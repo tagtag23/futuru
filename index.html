@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuru — Concrete Mix Optimizer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+    header { background: #1a1a1a; color: white; padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem; }
+    header h1 { font-size: 1.5rem; font-weight: 600; }
+    header span { font-size: 0.85rem; color: #888; }
+    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+    .card h2 { font-size: 0.85rem; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.2rem; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .slider-row label { font-size: 14px; color: #555; width: 160px; flex-shrink: 0; }
+    .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
+    .slider-row .val { font-size: 14px; font-weight: 500; min-width: 70px; text-align: right; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+    .metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
+    .metric .num { font-size: 2rem; font-weight: 600; color: #1a1a1a; }
+    .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+    .metric.highlight .num { color: #16a34a; }
+    .classes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .cls { padding: 8px 4px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid #e5e5e5; color: #888; background: #fafafa; }
+    .cls.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Futuru</h1>
+      <span>Concrete Mix Strength Optimizer — EN 206 European Standard</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="metrics">
+      <div class="metric highlight">
+        <div class="num" id="mpa-out">—</div>
+        <div class="lbl">Predicted strength (MPa)</div>
+      </div>
+      <div class="metric">
+        <div class="num" id="class-out">—</div>
+        <div class="lbl">EN 206 strength class</div>
+      </div>
+      <div class="metric">
+        <div class="num" id="wc-out">—</div>
+        <div class="lbl">Water / cement ratio</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Mix ingredients (kg/m³)</h2>
+      <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
+      <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
+      <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
+      <div class="slider-row"><label>Coarse aggregate</label><input type="range" min="800" max="1100" step="1" value="950" id="coarse"><span class="val"><span id="coarse-v">950</span> kg</span></div>
+      <div class="slider-row"><label>Fly ash</label><input type="range" min="0" max="200" step="1" value="50" id="flyash"><span class="val"><span id="flyash-v">50</span> kg</span></div>
+      <div class="slider-row"><label>Superplasticizer</label><input type="range" min="0" max="20" step="0.5" value="5" id="sp"><span class="val"><span id="sp-v">5.0</span> kg</span></div>
+      <div class="slider-row"><label>Curing age</label><input type="range" min="7" max="90" step="1" value="28" id="age"><span class="val"><span id="age-v">28</span> days</span></div>
+    </div>
+
+    <div class="card">
+      <h2>Strength vs. water/cement ratio</h2>
+      <div style="position:relative;height:250px;">
+        <canvas id="chart"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>EN 206 strength classes</h2>
+      <div class="classes" id="classes-grid"></div>
+    </div>
+  </div>
+
+  <footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+
+  <script>
+    const EN_CLASSES = [
+      {label:'C8/10',min:8},{label:'C12/15',min:12},{label:'C16/20',min:16},
+      {label:'C20/25',min:20},{label:'C25/30',min:25},{label:'C30/37',min:30},
+      {label:'C35/45',min:35},{label:'C40/50',min:40},{label:'C45/55',min:45},
+      {label:'C50/60',min:50},{label:'C55/67',min:55},{label:'C60/75',min:60}
+    ];
+
+    function predict(cement, water, fine, coarse, flyash, sp, age) {
+      const wc = water / (cement + 0.5 * flyash + 1e-6);
+      const binder = cement + 0.8 * flyash;
+      const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
+      return Math.max(s, 0);
+    }
+
+    function getClass(mpa) {
+      let cls = null;
+      for (const c of EN_CLASSES) { if (mpa >= c.min) cls = c; }
+      return cls ? cls.label : '< C8/10';
+    }
+
+    const ids = ['cement','water','fine','coarse','flyash','sp','age'];
+    const wcRatios = [];
+    for (let r = 0.25; r <= 1.4; r += 0.05) wcRatios.push(Math.round(r*100)/100);
+
+    const chart = new Chart(document.getElementById('chart'), {
+      type: 'line',
+      data: {
+        labels: wcRatios,
+        datasets: [
+          { label: 'Strength (MPa)', data: [], borderColor: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 },
+          { label: 'Your mix', data: [], borderColor: '#16a34a', backgroundColor: '#16a34a', pointRadius: 7, showLine: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'Water / cement ratio' } },
+          y: { title: { display: true, text: 'MPa' }, min: 0 }
+        }
+      }
+    });
+
+    function update() {
+      const [cement, water, fine, coarse, flyash, sp, age] = ids.map(id => parseFloat(document.getElementById(id).value));
+      document.getElementById('cement-v').textContent = cement;
+      document.getElementById('water-v').textContent = water;
+      document.getElementById('fine-v').textContent = fine;
+      document.getElementById('coarse-v').textContent = coarse;
+      document.getElementById('flyash-v').textContent = flyash;
+      document.getElementById('sp-v').textContent = sp.toFixed(1);
+      document.getElementById('age-v').textContent = age;
+
+      const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
+      const wc = water / cement;
+      document.getElementById('mpa-out').textContent = mpa.toFixed(1);
+      document.getElementById('class-out').textContent = getClass(mpa);
+      document.getElementById('wc-out').textContent = wc.toFixed(2);
+
+      chart.data.datasets[0].data = wcRatios.map(r => predict(cement, r*cement, fine, coarse, flyash, sp, age).toFixed(1));
+      chart.data.datasets[1].data = wcRatios.map(r => Math.abs(r - wc) < 0.025 ? mpa.toFixed(1) : null);
+      chart.update('none');
+
+      const grid = document.getElementById('classes-grid');
+      grid.innerHTML = '';
+      const active = getClass(mpa);
+      EN_CLASSES.forEach(c => {
+        const div = document.createElement('div');
+        div.className = 'cls' + (c.label === active ? ' active' : '');
+        div.textContent = c.label;
+        grid.appendChild(div);
+      });
+    }
+
+    ids.forEach(id => document.getElementById(id).addEventListener('input', update));
+    update();
+  </script>
+</body>
+</html>
