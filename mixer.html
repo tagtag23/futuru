@@ -15,48 +15,39 @@
     .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
     .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
     .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
-
-    /* Location selector */
-    .location-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .loc-btn { padding: 1.2rem; border-radius: 10px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: left; transition: all 0.15s; }
-    .loc-btn:hover { border-color: #aaa; }
-    .loc-btn.active-indoor { border-color: #1a1a1a; background: #1a1a1a; color: white; }
-    .loc-btn.active-outdoor { border-color: #0369a1; background: #0369a1; color: white; }
-    .loc-btn .loc-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
-    .loc-btn .loc-sub { font-size: 12px; opacity: 0.7; }
-    .loc-btn .loc-mixes { font-size: 11px; margin-top: 8px; opacity: 0.8; }
-
-    /* Metrics */
+    .btn-grid { display: grid; gap: 12px; }
+    .btn-grid.cols2 { grid-template-columns: 1fr 1fr; }
+    .sel-btn { padding: 1rem 1.2rem; border-radius: 10px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: left; transition: all 0.15s; }
+    .sel-btn:hover { border-color: #aaa; }
+    .sel-btn.active { border-color: #1a1a1a; background: #1a1a1a; color: white; }
+    .sel-btn.active-blue { border-color: #0369a1; background: #0369a1; color: white; }
+    .sel-btn .btn-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .sel-btn .btn-sub { font-size: 12px; opacity: 0.7; }
+    .sel-btn .btn-std { font-size: 11px; opacity: 0.6; margin-top: 6px; }
     .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
     .metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
     .metric .num { font-size: 1.8rem; font-weight: 600; }
     .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
     .metric.good .num { color: #16a34a; }
     .metric.info .num { color: #0369a1; }
-
-    /* Sliders */
     .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
     .slider-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
     .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
     .slider-row .val { font-size: 13px; font-weight: 500; min-width: 65px; text-align: right; }
-
-    /* Mix classes */
-    .mix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+    .mix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
     .mix-item { padding: 10px 12px; border-radius: 8px; border: 1px solid #e5e5e5; background: #fafafa; }
     .mix-item.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
-    .mix-item.active-outdoor { background: #0369a1; border-color: #0369a1; color: white; }
+    .mix-item.active-blue { background: #0369a1; border-color: #0369a1; color: white; }
     .mix-item .mix-strength { font-size: 14px; font-weight: 600; }
     .mix-item .mix-exposure { font-size: 11px; opacity: 0.7; margin-top: 2px; }
     .mix-item .mix-use { font-size: 10px; opacity: 0.6; margin-top: 2px; }
-
-    /* Result banner */
     .result-banner { padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; display: none; }
     .result-banner.show { display: block; }
     .result-banner.match { background: #dcfce7; border: 1px solid #86efac; }
     .result-banner.nomatch { background: #fef9c3; border: 1px solid #fde047; }
     .result-banner p { font-size: 14px; font-weight: 500; }
     .result-banner span { font-size: 13px; color: #555; }
-
+    .step-hint { font-size: 13px; color: #aaa; text-align: center; padding: 1rem; }
     footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
   </style>
 </head>
@@ -69,19 +60,36 @@
 
 <div class="container">
 
-  <!-- Step 1: Location -->
+  <!-- Step 1: Plant -->
   <div class="card">
-    <p class="card-title">Step 1 — Where will this concrete be used?</p>
-    <div class="location-btns">
-      <button class="loc-btn" id="btn-indoor" onclick="setLocation('indoor')">
-        <div class="loc-title">Indoors</div>
-        <div class="loc-sub">Protected from weather</div>
-        <div class="loc-mixes">C35/45 · C50/60</div>
+    <p class="card-title">Step 1 — Which plant is the concrete from?</p>
+    <div class="btn-grid cols2">
+      <button class="sel-btn" id="btn-reykjavik" onclick="setPlant('reykjavik')">
+        <div class="btn-title">Reykjavík</div>
+        <div class="btn-sub">Breiðhöfða 3, 110 Reykjavík</div>
+        <div class="btn-std">ÍST EN 206:2013+A1:2016 · Valid to Jan 2027</div>
       </button>
-      <button class="loc-btn" id="btn-outdoor" onclick="setLocation('outdoor')">
-        <div class="loc-title">Outdoors</div>
-        <div class="loc-sub">Exposed to weather & frost</div>
-        <div class="loc-mixes">C25/30 · C30/37 · C35/45 · C40/50</div>
+      <button class="sel-btn" id="btn-akranes" onclick="setPlant('akranes')">
+        <div class="btn-title">Akranes</div>
+        <div class="btn-sub">Höfðasel 4, 300 Akranes</div>
+        <div class="btn-std">ÍST EN 206:2013+A2:2021 · Valid to Feb 2026</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Step 2: Location -->
+  <div class="card" id="step2-card" style="opacity:0.4; pointer-events:none;">
+    <p class="card-title">Step 2 — Where will this concrete be used?</p>
+    <div class="btn-grid cols2">
+      <button class="sel-btn" id="btn-indoor" onclick="setLocation('indoor')">
+        <div class="btn-title">Indoors</div>
+        <div class="btn-sub">Protected from weather</div>
+        <div class="btn-std">C35/45 · C50/60</div>
+      </button>
+      <button class="sel-btn" id="btn-outdoor" onclick="setLocation('outdoor')">
+        <div class="btn-title">Outdoors</div>
+        <div class="btn-sub">Exposed to weather & frost</div>
+        <div class="btn-std">C25/30 · C30/37 · C35/45 · C40/50</div>
       </button>
     </div>
   </div>
@@ -99,9 +107,9 @@
     <div class="metric"><div class="num" id="wc-out">—</div><div class="lbl">Water / cement ratio</div></div>
   </div>
 
-  <!-- Step 2: Sliders -->
-  <div class="card">
-    <p class="card-title">Step 2 — Adjust your mix ingredients (kg/m³)</p>
+  <!-- Step 3: Sliders -->
+  <div class="card" id="step3-card" style="opacity:0.4; pointer-events:none;">
+    <p class="card-title">Step 3 — Adjust your mix ingredients (kg/m³)</p>
     <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
     <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
     <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
@@ -119,10 +127,12 @@
     </div>
   </div>
 
-  <!-- BM Vallá certified mixes -->
+  <!-- Certified mixes -->
   <div class="card">
-    <p class="card-title">BM Vallá certified mixes — ÍST EN 206:2013+A2:2021</p>
-    <div class="mix-grid" id="mix-grid"></div>
+    <p class="card-title" id="mix-title">BM Vallá certified mixes</p>
+    <div class="mix-grid" id="mix-grid">
+      <p class="step-hint">Select a plant and location above to see certified mixes.</p>
+    </div>
   </div>
 
 </div>
@@ -143,17 +153,33 @@ const MIXES = {
   ]
 };
 
-const MIN_MPA = {
-  'C25/30': 25, 'C30/37': 30, 'C35/45': 35,
-  'C40/50': 40, 'C45/55': 45, 'C50/60': 50
+const STANDARDS = {
+  reykjavik: 'ÍST EN 206:2013+A1:2016',
+  akranes: 'ÍST EN 206:2013+A2:2021'
 };
 
+const MIN_MPA = {
+  'C25/30': 25, 'C30/37': 30, 'C35/45': 35, 'C40/50': 40, 'C50/60': 50
+};
+
+let currentPlant = null;
 let currentLocation = null;
+
+function setPlant(plant) {
+  currentPlant = plant;
+  document.getElementById('btn-reykjavik').className = 'sel-btn' + (plant === 'reykjavik' ? ' active' : '');
+  document.getElementById('btn-akranes').className = 'sel-btn' + (plant === 'akranes' ? ' active' : '');
+  document.getElementById('step2-card').style.opacity = '1';
+  document.getElementById('step2-card').style.pointerEvents = 'auto';
+  update();
+}
 
 function setLocation(loc) {
   currentLocation = loc;
-  document.getElementById('btn-indoor').className = 'loc-btn' + (loc === 'indoor' ? ' active-indoor' : '');
-  document.getElementById('btn-outdoor').className = 'loc-btn' + (loc === 'outdoor' ? ' active-outdoor' : '');
+  document.getElementById('btn-indoor').className = 'sel-btn' + (loc === 'indoor' ? ' active' : '');
+  document.getElementById('btn-outdoor').className = 'sel-btn' + (loc === 'outdoor' ? ' active-blue' : '');
+  document.getElementById('step3-card').style.opacity = '1';
+  document.getElementById('step3-card').style.pointerEvents = 'auto';
   update();
 }
 
@@ -168,8 +194,7 @@ function getBestMatch(mpa, loc) {
   if (!loc) return null;
   let match = null;
   for (const m of MIXES[loc]) {
-    const min = MIN_MPA[m.strength] || 0;
-    if (mpa >= min) match = m;
+    if (mpa >= (MIN_MPA[m.strength] || 0)) match = m;
   }
   return match;
 }
@@ -215,6 +240,10 @@ function update() {
   const match = getBestMatch(mpa, currentLocation);
   document.getElementById('class-out').textContent = match ? match.strength : '—';
 
+  if (currentPlant) {
+    document.getElementById('mix-title').textContent = 'BM Vallá certified mixes — ' + STANDARDS[currentPlant];
+  }
+
   const banner = document.getElementById('result-banner');
   if (currentLocation && match) {
     banner.className = 'result-banner show match';
@@ -235,14 +264,13 @@ function update() {
   const grid = document.getElementById('mix-grid');
   grid.innerHTML = '';
   if (!currentLocation) {
-    grid.innerHTML = '<p style="font-size:13px;color:#888;">Select indoors or outdoors above to see certified mixes.</p>';
+    grid.innerHTML = '<p style="font-size:13px;color:#aaa;padding:0.5rem;">Select a plant and location above to see certified mixes.</p>';
     return;
   }
   MIXES[currentLocation].forEach(m => {
-    const min = MIN_MPA[m.strength] || 0;
-    const isMatch = mpa >= min;
+    const isMatch = mpa >= (MIN_MPA[m.strength] || 0);
     const div = document.createElement('div');
-    div.className = 'mix-item' + (isMatch ? (currentLocation === 'outdoor' ? ' active-outdoor' : ' active') : '');
+    div.className = 'mix-item' + (isMatch ? (currentLocation === 'outdoor' ? ' active-blue' : ' active') : '');
     div.innerHTML = '<div class="mix-strength">' + m.strength + '</div><div class="mix-exposure">' + m.exposure + '</div><div class="mix-use">' + m.use + '</div>';
     grid.appendChild(div);
   });
