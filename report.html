@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuru — Report Export</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+    nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+    nav .back:hover { color: white; }
+    .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+    .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.2rem; }
+    .form-field { display: flex; flex-direction: column; gap: 4px; }
+    .form-field label { font-size: 12px; color: #888; }
+    .form-field input, .form-field select, .form-field textarea { padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; font-family: system-ui, sans-serif; }
+    .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #1a1a1a; }
+    .form-field textarea { resize: vertical; min-height: 80px; }
+    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+    .slider-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
+    .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
+    .slider-row .val { font-size: 13px; font-weight: 500; min-width: 65px; text-align: right; }
+    .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+    .metric { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1rem; text-align: center; }
+    .metric .num { font-size: 1.6rem; font-weight: 600; }
+    .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+    .metric.good .num { color: #16a34a; }
+    .export-btn { width: 100%; padding: 1rem; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
+    .export-btn:hover { background: #333; }
+
+    /* Print/PDF styles */
+    @media print {
+      nav, .no-print { display: none !important; }
+      body { background: white; }
+      .container { margin: 0; padding: 0; max-width: 100%; }
+      .card { border: 1px solid #ddd; break-inside: avoid; }
+      .export-btn { display: none; }
+      .print-header { display: block !important; }
+    }
+    .print-header { display: none; border-bottom: 2px solid #1a1a1a; padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .print-header h1 { font-size: 1.5rem; }
+    .print-header p { font-size: 13px; color: #666; margin-top: 4px; }
+
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Futuru</a>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
+
+<div class="container">
+
+  <div class="print-header">
+    <h1>Futuru — Concrete Mix Report</h1>
+    <p id="print-date"></p>
+  </div>
+
+  <div class="card no-print">
+    <p class="card-title">Report details</p>
+    <div class="form-grid">
+      <div class="form-field">
+        <label>Engineer name</label>
+        <input type="text" id="engineer" placeholder="e.g. Anna Jónsdóttir">
+      </div>
+      <div class="form-field">
+        <label>Project name</label>
+        <input type="text" id="project" placeholder="e.g. Reykjavík Harbor">
+      </div>
+      <div class="form-field">
+        <label>Plant</label>
+        <select id="plant">
+          <option value="reykjavik">Reykjavík — ÍST EN 206:2013+A1:2016</option>
+          <option value="akranes">Akranes — ÍST EN 206:2013+A2:2021</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Location</label>
+        <select id="location">
+          <option value="indoor">Indoors</option>
+          <option value="outdoor">Outdoors</option>
+        </select>
+      </div>
+      <div class="form-field" style="grid-column: span 2;">
+        <label>Notes</label>
+        <textarea id="notes" placeholder="Any additional notes about this mix..."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Mix ingredients (kg/m³)</p>
+    <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
+    <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
+    <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
+    <div class="slider-row"><label>Coarse aggregate</label><input type="range" min="800" max="1100" step="1" value="950" id="coarse"><span class="val"><span id="coarse-v">950</span> kg</span></div>
+    <div class="slider-row"><label>Fly ash</label><input type="range" min="0" max="200" step="1" value="50" id="flyash"><span class="val"><span id="flyash-v">50</span> kg</span></div>
+    <div class="slider-row"><label>Superplasticizer</label><input type="range" min="0" max="20" step="0.5" value="5" id="sp"><span class="val"><span id="sp-v">5.0</span> kg</span></div>
+    <div class="slider-row"><label>Curing age</label><input type="range" min="7" max="90" step="1" value="28" id="age"><span class="val"><span id="age-v">28</span> days</span></div>
+  </div>
+
+  <div class="metrics">
+    <div class="metric good"><div class="num" id="mpa-out">—</div><div class="lbl">Predicted strength (MPa)</div></div>
+    <div class="metric"><div class="num" id="class-out">—</div><div class="lbl">Certified class</div></div>
+    <div class="metric"><div class="num" id="wc-out">—</div><div class="lbl">Water / cement ratio</div></div>
+  </div>
+
+  <div class="card" id="report-preview">
+    <p class="card-title">Report preview</p>
+    <div id="report-content"></div>
+  </div>
+
+  <div class="no-print">
+    <button class="export-btn" onclick="exportPDF()">Export as PDF →</button>
+  </div>
+
+</div>
+
+<footer class="no-print">Futuru © 2026 — Built on BOxCrete open source</footer>
+
+<script>
+const MIXES_DB = {
+  indoor: [
+    { strength: 'C35/45', exposure: 'XC3/XD1', minMpa: 35 },
+    { strength: 'C50/60', exposure: 'XC4', minMpa: 50 }
+  ],
+  outdoor: [
+    { strength: 'C25/30', exposure: 'XF1/XF2', minMpa: 25 },
+    { strength: 'C30/37', exposure: 'XF3', minMpa: 30 },
+    { strength: 'C35/45', exposure: 'XF4', minMpa: 35 },
+    { strength: 'C40/50', exposure: 'XF4', minMpa: 40 }
+  ]
+};
+
+const STANDARDS = {
+  reykjavik: 'ÍST EN 206:2013+A1:2016',
+  akranes: 'ÍST EN 206:2013+A2:2021'
+};
+
+function predict(cement, water, fine, coarse, flyash, sp, age) {
+  const wc = water / (cement + 0.5 * flyash + 1e-6);
+  const binder = cement + 0.8 * flyash;
+  const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
+  return Math.max(s, 0);
+}
+
+function getCertifiedClass(mpa, location) {
+  let match = null;
+  for (const m of MIXES_DB[location]) {
+    if (mpa >= m.minMpa) match = m;
+  }
+  return match;
+}
+
+const ids = ['cement','water','fine','coarse','flyash','sp','age'];
+
+function update() {
+  const [cement, water, fine, coarse, flyash, sp, age] = ids.map(id => parseFloat(document.getElementById(id).value));
+  document.getElementById('cement-v').textContent = cement;
+  document.getElementById('water-v').textContent = water;
+  document.getElementById('fine-v').textContent = fine;
+  document.getElementById('coarse-v').textContent = coarse;
+  document.getElementById('flyash-v').textContent = flyash;
+  document.getElementById('sp-v').textContent = sp.toFixed(1);
+  document.getElementById('age-v').textContent = age;
+
+  const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
+  const wc = water / cement;
+  const location = document.getElementById('location').value;
+  const plant = document.getElementById('plant').value;
+  const certClass = getCertifiedClass(mpa, location);
+
+  document.getElementById('mpa-out').textContent = mpa.toFixed(1);
+  document.getElementById('class-out').textContent = certClass ? certClass.strength : '—';
+  document.getElementById('wc-out').textContent = wc.toFixed(2);
+
+  const engineer = document.getElementById('engineer').value || '—';
+  const project = document.getElementById('project').value || '—';
+  const notes = document.getElementById('notes').value || '—';
+  const date = new Date().toLocaleDateString('en-GB');
+
+  document.getElementById('print-date').textContent = 'Generated: ' + date + ' · ' + engineer + ' · ' + project;
+
+  document.getElementById('report-content').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;">
+      <tr style="border-bottom:1px solid #e5e5e5;">
+        <td style="padding:8px 0;color:#888;width:200px;">Engineer</td>
+        <td style="padding:8px 0;font-weight:500;">${engineer}</td>
+        <td style="padding:8px 0;color:#888;width:200px;">Project</td>
+        <td style="padding:8px 0;font-weight:500;">${project}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e5e5e5;">
+        <td style="padding:8px 0;color:#888;">Plant</td>
+        <td style="padding:8px 0;font-weight:500;">BM Vallá — ${plant === 'reykjavik' ? 'Reykjavík' : 'Akranes'}</td>
+        <td style="padding:8px 0;color:#888;">Standard</td>
+        <td style="padding:8px 0;font-weight:500;">${STANDARDS[plant]}</td>
+      </tr>
+      <tr style="border-bottom:1px solid #e5e5e5;">
+        <td style="padding:8px 0;color:#888;">Location</td>
+        <td style="padding:8px 0;font-weight:500;">${location === 'indoor' ? 'Indoors' : 'Outdoors'}</td>
+        <td style="padding:8px 0;color:#888;">Date</td>
+        <td style="padding:8px 0;font-weight:500;">${date}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;color:#888;">Notes</td>
+        <td style="padding:8px 0;" colspan="3">${notes}</td>
+      </tr>
+    </table>
+
+    <p style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Mix design</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;">
+      <tr style="background:#fafafa;">
+        <th style="padding:8px;text-align:left;border:1px solid #e5e5e5;">Ingredient</th>
+        <th style="padding:8px;text-align:right;border:1px solid #e5e5e5;">Amount (kg/m³)</th>
+      </tr>
+      ${[
+        ['Cement', cement],
+        ['Water', water],
+        ['Fine aggregate', fine],
+        ['Coarse aggregate', coarse],
+        ['Fly ash', flyash],
+        ['Superplasticizer', sp.toFixed(1)],
+        ['Curing age', age + ' days']
+      ].map(([name, val]) => `
+        <tr>
+          <td style="padding:8px;border:1px solid #e5e5e5;">${name}</td>
+          <td style="padding:8px;text-align:right;border:1px solid #e5e5e5;font-weight:500;">${val}</td>
+        </tr>
+      `).join('')}
+    </table>
+
+    <p style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Results</p>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Predicted strength</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;color:#16a34a;">${mpa.toFixed(1)} MPa</td></tr>
+      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Certified class</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${certClass ? certClass.strength : '—'}</td></tr>
+      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Exposure class</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${certClass ? certClass.exposure : '—'}</td></tr>
+      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Water/cement ratio</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${wc.toFixed(2)}</td></tr>
+    </table>
+  `;
+}
+
+function exportPDF() {
+  document.getElementById('print-date').textContent = 'Generated: ' + new Date().toLocaleDateString('en-GB') + ' · ' + (document.getElementById('engineer').value || '—') + ' · ' + (document.getElementById('project').value || '—');
+  window.print();
+}
+
+ids.forEach(id => document.getElementById(id).addEventListener('input', update));
+['engineer','project','plant','location','notes'].forEach(id => document.getElementById(id).addEventListener('input', update));
+update();
+</script>
+</body>
+</html>
