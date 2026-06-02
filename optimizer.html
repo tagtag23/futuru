@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuru — AI Optimizer</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+    nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+    nav .back:hover { color: white; }
+    .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+    .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
+    .btn-grid { display: grid; gap: 12px; }
+    .btn-grid.cols2 { grid-template-columns: 1fr 1fr; }
+    .sel-btn { padding: 1rem 1.2rem; border-radius: 10px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: left; transition: all 0.15s; }
+    .sel-btn:hover { border-color: #aaa; }
+    .sel-btn.active { border-color: #1a1a1a; background: #1a1a1a; color: white; }
+    .sel-btn.active-blue { border-color: #0369a1; background: #0369a1; color: white; }
+    .sel-btn .btn-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+    .sel-btn .btn-sub { font-size: 12px; opacity: 0.7; }
+    .target-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+    .target-btn { padding: 12px; border-radius: 8px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .target-btn:hover { border-color: #aaa; }
+    .target-btn.active { border-color: #16a34a; background: #16a34a; color: white; }
+    .target-btn .t-class { font-size: 15px; font-weight: 600; }
+    .target-btn .t-exp { font-size: 11px; opacity: 0.7; margin-top: 3px; }
+    .optimize-btn { width: 100%; padding: 1rem; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+    .optimize-btn:hover { background: #333; }
+    .optimize-btn:disabled { background: #aaa; cursor: not-allowed; }
+    .progress { display: none; margin-top: 1rem; }
+    .progress.show { display: block; }
+    .progress-bar-bg { background: #f0f0f0; border-radius: 20px; height: 6px; margin-bottom: 8px; }
+    .progress-bar { background: #16a34a; height: 6px; border-radius: 20px; width: 0%; transition: width 0.3s; }
+    .progress-text { font-size: 13px; color: #888; text-align: center; }
+    .results { display: none; }
+    .results.show { display: block; }
+    .result-header { background: #dcfce7; border: 1px solid #86efac; border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; }
+    .result-header p { font-size: 15px; font-weight: 600; color: #15803d; }
+    .result-header span { font-size: 13px; color: #16a34a; }
+    .ingredients-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ingredient { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .ingredient .ing-name { font-size: 13px; color: #555; }
+    .ingredient .ing-val { font-size: 16px; font-weight: 600; }
+    .trials-list { max-height: 200px; overflow-y: auto; }
+    .trial-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+    .trial-row:last-child { border-bottom: none; }
+    .trial-row .t-num { color: #aaa; width: 50px; }
+    .trial-row .t-mpa { font-weight: 600; color: #16a34a; }
+    .trial-row .t-best { background: #dcfce7; color: #15803d; padding: 1px 6px; border-radius: 4px; font-size: 11px; }
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Futuru</a>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
+
+<div class="container">
+
+  <div class="card">
+    <p class="card-title">Step 1 — Which plant?</p>
+    <div class="btn-grid cols2">
+      <button class="sel-btn" id="btn-reykjavik" onclick="setPlant('reykjavik')">
+        <div class="btn-title">Reykjavík</div>
+        <div class="btn-sub">ÍST EN 206:2013+A1:2016</div>
+      </button>
+      <button class="sel-btn" id="btn-akranes" onclick="setPlant('akranes')">
+        <div class="btn-title">Akranes</div>
+        <div class="btn-sub">ÍST EN 206:2013+A2:2021</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="step2" style="opacity:0.4;pointer-events:none;">
+    <p class="card-title">Step 2 — Indoor or outdoor?</p>
+    <div class="btn-grid cols2">
+      <button class="sel-btn" id="btn-indoor" onclick="setLocation('indoor')">
+        <div class="btn-title">Indoors</div>
+        <div class="btn-sub">Protected from weather</div>
+      </button>
+      <button class="sel-btn" id="btn-outdoor" onclick="setLocation('outdoor')">
+        <div class="btn-title">Outdoors</div>
+        <div class="btn-sub">Exposed to weather & frost</div>
+      </button>
+    </div>
+  </div>
+
+  <div class="card" id="step3" style="opacity:0.4;pointer-events:none;">
+    <p class="card-title">Step 3 — Target strength class</p>
+    <div class="target-grid" id="target-grid"></div>
+  </div>
+
+  <div class="card" id="step4" style="opacity:0.4;pointer-events:none;">
+    <p class="card-title">Step 4 — Run optimizer</p>
+    <button class="optimize-btn" id="opt-btn" onclick="runOptimizer()">Find optimal mix →</button>
+    <div class="progress" id="progress">
+      <div style="margin-top:1rem;">
+        <div class="progress-bar-bg"><div class="progress-bar" id="progress-bar"></div></div>
+        <p class="progress-text" id="progress-text">Running trial 0 of 30...</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div class="result-header">
+      <p id="result-title">✓ Optimal mix found!</p>
+      <span id="result-sub"></span>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Optimal mix ingredients (kg/m³)</p>
+      <div class="ingredients-grid" id="ingredients-grid"></div>
+    </div>
+
+    <div class="card">
+      <p class="card-title">Optimization trials</p>
+      <div class="trials-list" id="trials-list"></div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+
+<script>
+const MIXES = {
+  indoor: [
+    { strength: 'C35/45', exposure: 'XC3/XD1', minMpa: 35 },
+    { strength: 'C50/60', exposure: 'XC4', minMpa: 50 }
+  ],
+  outdoor: [
+    { strength: 'C25/30', exposure: 'XF1/XF2', minMpa: 25 },
+    { strength: 'C30/37', exposure: 'XF3', minMpa: 30 },
+    { strength: 'C35/45', exposure: 'XF4', minMpa: 35 },
+    { strength: 'C40/50', exposure: 'XF4', minMpa: 40 }
+  ]
+};
+
+let plant = null, location = null, target = null;
+
+function setPlant(p) {
+  plant = p;
+  document.getElementById('btn-reykjavik').className = 'sel-btn' + (p === 'reykjavik' ? ' active' : '');
+  document.getElementById('btn-akranes').className = 'sel-btn' + (p === 'akranes' ? ' active' : '');
+  document.getElementById('step2').style.opacity = '1';
+  document.getElementById('step2').style.pointerEvents = 'auto';
+}
+
+function setLocation(loc) {
+  location = loc;
+  document.getElementById('btn-indoor').className = 'sel-btn' + (loc === 'indoor' ? ' active' : '');
+  document.getElementById('btn-outdoor').className = 'sel-btn' + (loc === 'outdoor' ? ' active-blue' : '');
+  document.getElementById('step3').style.opacity = '1';
+  document.getElementById('step3').style.pointerEvents = 'auto';
+  buildTargets();
+}
+
+function buildTargets() {
+  const grid = document.getElementById('target-grid');
+  grid.innerHTML = '';
+  target = null;
+  MIXES[location].forEach(m => {
+    const btn = document.createElement('button');
+    btn.className = 'target-btn';
+    btn.id = 'target-' + m.strength;
+    btn.innerHTML = '<div class="t-class">' + m.strength + '</div><div class="t-exp">' + m.exposure + '</div>';
+    btn.onclick = () => setTarget(m);
+    grid.appendChild(btn);
+  });
+}
+
+function setTarget(m) {
+  target = m;
+  MIXES[location].forEach(mix => {
+    const btn = document.getElementById('target-' + mix.strength);
+    if (btn) btn.className = 'target-btn' + (mix.strength === m.strength ? ' active' : '');
+  });
+  document.getElementById('step4').style.opacity = '1';
+  document.getElementById('step4').style.pointerEvents = 'auto';
+}
+
+function predict(cement, water, fine, coarse, flyash, sp, age) {
+  const wc = water / (cement + 0.5 * flyash + 1e-6);
+  const binder = cement + 0.8 * flyash;
+  const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
+  return Math.max(s, 0);
+}
+
+function randomInRange(min, max) {
+  return min + Math.random() * (max - min);
+}
+
+function runOptimizer() {
+  if (!plant || !location || !target) return;
+
+  document.getElementById('opt-btn').disabled = true;
+  document.getElementById('progress').className = 'progress show';
+  document.getElementById('results').className = 'results';
+
+  const TRIALS = 30;
+  const trials = [];
+  let bestMpa = 0;
+  let bestParams = null;
+  let i = 0;
+
+  const RANGES = {
+    cement: [150, 450], water: [120, 220],
+    fine: [600, 900], coarse: [800, 1100],
+    flyash: [0, 200], sp: [0, 20], age: [7, 90]
+  };
+
+  function runTrial() {
+    if (i >= TRIALS) {
+      showResults(trials, bestParams, bestMpa);
+      return;
+    }
+
+    let cement, water, fine, coarse, flyash, sp, age;
+
+    if (i < 10) {
+      cement = randomInRange(150, 450);
+      water = randomInRange(120, 220);
+      fine = randomInRange(600, 900);
+      coarse = randomInRange(800, 1100);
+      flyash = randomInRange(0, 200);
+      sp = randomInRange(0, 20);
+      age = randomInRange(7, 90);
+    } else {
+      cement = bestParams.cement + randomInRange(-50, 50);
+      water = bestParams.water + randomInRange(-20, 20);
+      fine = bestParams.fine + randomInRange(-50, 50);
+      coarse = bestParams.coarse + randomInRange(-50, 50);
+      flyash = bestParams.flyash + randomInRange(-30, 30);
+      sp = bestParams.sp + randomInRange(-3, 3);
+      age = bestParams.age + randomInRange(-10, 10);
+
+      cement = Math.max(150, Math.min(450, cement));
+      water = Math.max(120, Math.min(220, water));
+      fine = Math.max(600, Math.min(900, fine));
+      coarse = Math.max(800, Math.min(1100, coarse));
+      flyash = Math.max(0, Math.min(200, flyash));
+      sp = Math.max(0, Math.min(20, sp));
+      age = Math.max(7, Math.min(90, age));
+    }
+
+    const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
+    trials.push({ i: i+1, mpa, cement, water, fine, coarse, flyash, sp, age });
+
+    if (mpa > bestMpa) {
+      bestMpa = mpa;
+      bestParams = { cement, water, fine, coarse, flyash, sp, age };
+    }
+
+    const pct = Math.round(((i+1) / TRIALS) * 100);
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = 'Running trial ' + (i+1) + ' of ' + TRIALS + '...';
+
+    i++;
+    setTimeout(runTrial, 60);
+  }
+
+  runTrial();
+}
+
+function showResults(trials, best, bestMpa) {
+  document.getElementById('progress').className = 'progress';
+  document.getElementById('opt-btn').disabled = false;
+  document.getElementById('results').className = 'results show';
+
+  document.getElementById('result-title').textContent = '✓ Optimal mix found for ' + target.strength;
+  document.getElementById('result-sub').textContent = 'Predicted strength: ' + bestMpa.toFixed(1) + ' MPa · ' + target.exposure;
+
+  const grid = document.getElementById('ingredients-grid');
+  const labels = { cement: 'Cement', water: 'Water', fine: 'Fine aggregate', coarse: 'Coarse aggregate', flyash: 'Fly ash', sp: 'Superplasticizer', age: 'Curing age' };
+  const units = { cement: 'kg', water: 'kg', fine: 'kg', coarse: 'kg', flyash: 'kg', sp: 'kg', age: 'days' };
+  grid.innerHTML = '';
+  Object.keys(labels).forEach(key => {
+    const div = document.createElement('div');
+    div.className = 'ingredient';
+    div.innerHTML = '<span class="ing-name">' + labels[key] + '</span><span class="ing-val">' + best[key].toFixed(1) + ' ' + units[key] + '</span>';
+    grid.appendChild(div);
+  });
+
+  const list = document.getElementById('trials-list');
+  list.innerHTML = '';
+  let runningBest = 0;
+  trials.forEach(t => {
+    const isBest = t.mpa === Math.max(...trials.map(x => x.mpa));
+    if (t.mpa > runningBest) runningBest = t.mpa;
+    const row = document.createElement('div');
+    row.className = 'trial-row';
+    row.innerHTML = '<span class="t-num">Trial ' + t.i + '</span><span class="t-mpa">' + t.mpa.toFixed(1) + ' MPa</span>' + (isBest ? '<span class="t-best">Best</span>' : '');
+    list.appendChild(row);
+  });
+}
+</script>
+</body>
+</html>
