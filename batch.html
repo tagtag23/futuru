@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuru — Batch Analyzer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+    nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+    nav .back:hover { color: white; }
+    .container { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; }
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+    .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
+    .add-row { display: grid; grid-template-columns: repeat(7, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 12px; }
+    .add-row input { padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; width: 100%; }
+    .add-row input:focus { outline: none; border-color: #1a1a1a; }
+    .field-label { font-size: 11px; color: #888; margin-bottom: 4px; }
+    .add-btn { padding: 8px 16px; background: #1a1a1a; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; white-space: nowrap; }
+    .add-btn:hover { background: #333; }
+    .mix-name-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .mix-name-row input { flex: 1; padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; }
+    .mix-name-row input:focus { outline: none; border-color: #1a1a1a; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e5e5e5; font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 10px; border-bottom: 1px solid #f5f5f5; }
+    tr:last-child td { border-bottom: none; }
+    .strength-badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .badge-yellow { background: #fef9c3; color: #854d0e; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
+    .delete-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; padding: 0 4px; }
+    .delete-btn:hover { color: #ef4444; }
+    .empty-state { text-align: center; padding: 2rem; color: #aaa; font-size: 14px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+    .summary-card { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1rem; text-align: center; }
+    .summary-card .s-num { font-size: 1.6rem; font-weight: 600; color: #1a1a1a; }
+    .summary-card .s-lbl { font-size: 12px; color: #888; margin-top: 4px; }
+    .summary-card.best .s-num { color: #16a34a; }
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Futuru</a>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
+
+<div class="container">
+
+  <div class="card">
+    <p class="card-title">Add a mix</p>
+    <div class="mix-name-row">
+      <input type="text" id="mix-name" placeholder="Mix name (e.g. Mix A, Trial 1)">
+    </div>
+    <div class="add-row">
+      <div><div class="field-label">Cement (kg)</div><input type="number" id="f-cement" value="350" min="150" max="450"></div>
+      <div><div class="field-label">Water (kg)</div><input type="number" id="f-water" value="175" min="120" max="220"></div>
+      <div><div class="field-label">Fine agg. (kg)</div><input type="number" id="f-fine" value="750" min="600" max="900"></div>
+      <div><div class="field-label">Coarse agg. (kg)</div><input type="number" id="f-coarse" value="950" min="800" max="1100"></div>
+      <div><div class="field-label">Fly ash (kg)</div><input type="number" id="f-flyash" value="50" min="0" max="200"></div>
+      <div><div class="field-label">Superpl. (kg)</div><input type="number" id="f-sp" value="5" min="0" max="20"></div>
+      <div><div class="field-label">Age (days)</div><input type="number" id="f-age" value="28" min="7" max="90"></div>
+      <button class="add-btn" onclick="addMix()">Add →</button>
+    </div>
+  </div>
+
+  <div class="card" id="results-card" style="display:none;">
+    <p class="card-title">Summary</p>
+    <div class="summary-grid" id="summary-grid"></div>
+  </div>
+
+  <div class="card" id="chart-card" style="display:none;">
+    <p class="card-title">Strength comparison</p>
+    <div style="position:relative;height:280px;">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Mix results</p>
+    <div id="table-container">
+      <div class="empty-state">No mixes added yet — add your first mix above!</div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+
+<script>
+let mixes = [];
+
+const EN_CLASSES = [
+  {label:'C25/30',min:25},{label:'C30/37',min:30},{label:'C35/45',min:35},
+  {label:'C40/50',min:40},{label:'C50/60',min:50},{label:'C60/75',min:60}
+];
+
+function predict(cement, water, fine, coarse, flyash, sp, age) {
+  const wc = water / (cement + 0.5 * flyash + 1e-6);
+  const binder = cement + 0.8 * flyash;
+  const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
+  return Math.max(s, 0);
+}
+
+function getClass(mpa) {
+  let cls = null;
+  for (const c of EN_CLASSES) { if (mpa >= c.min) cls = c; }
+  return cls ? cls.label : '< C25/30';
+}
+
+function addMix() {
+  const name = document.getElementById('mix-name').value || ('Mix ' + (mixes.length + 1));
+  const cement = parseFloat(document.getElementById('f-cement').value);
+  const water = parseFloat(document.getElementById('f-water').value);
+  const fine = parseFloat(document.getElementById('f-fine').value);
+  const coarse = parseFloat(document.getElementById('f-coarse').value);
+  const flyash = parseFloat(document.getElementById('f-flyash').value);
+  const sp = parseFloat(document.getElementById('f-sp').value);
+  const age = parseFloat(document.getElementById('f-age').value);
+  const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
+  const wc = water / cement;
+
+  mixes.push({ name, cement, water, fine, coarse, flyash, sp, age, mpa, wc });
+  document.getElementById('mix-name').value = '';
+  render();
+}
+
+function deleteMix(i) {
+  mixes.splice(i, 1);
+  render();
+}
+
+let chartInstance = null;
+
+function render() {
+  const container = document.getElementById('table-container');
+  const resultsCard = document.getElementById('results-card');
+  const chartCard = document.getElementById('chart-card');
+
+  if (mixes.length === 0) {
+    container.innerHTML = '<div class="empty-state">No mixes added yet — add your first mix above!</div>';
+    resultsCard.style.display = 'none';
+    chartCard.style.display = 'none';
+    return;
+  }
+
+  resultsCard.style.display = 'block';
+  chartCard.style.display = 'block';
+
+  const bestMpa = Math.max(...mixes.map(m => m.mpa));
+  const avgMpa = mixes.reduce((a, m) => a + m.mpa, 0) / mixes.length;
+  const bestMix = mixes.find(m => m.mpa === bestMpa);
+
+  const summaryGrid = document.getElementById('summary-grid');
+  summaryGrid.innerHTML = `
+    <div class="summary-card"><div class="s-num">${mixes.length}</div><div class="s-lbl">Mixes tested</div></div>
+    <div class="summary-card best"><div class="s-num">${bestMpa.toFixed(1)}</div><div class="s-lbl">Best strength (MPa)</div></div>
+    <div class="summary-card"><div class="s-num">${avgMpa.toFixed(1)}</div><div class="s-lbl">Average strength (MPa)</div></div>
+    <div class="summary-card"><div class="s-num">${getClass(bestMpa)}</div><div class="s-lbl">Best class (${bestMix.name})</div></div>
+  `;
+
+  container.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Strength (MPa)</th>
+          <th>Class</th>
+          <th>W/C ratio</th>
+          <th>Cement (kg)</th>
+          <th>Water (kg)</th>
+          <th>Age (days)</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        ${mixes.map((m, i) => {
+          const isBest = m.mpa === bestMpa;
+          const badgeClass = isBest ? 'badge-green' : m.mpa >= 30 ? 'badge-yellow' : 'badge-red';
+          return `<tr>
+            <td><strong>${m.name}</strong>${isBest ? ' <span style="font-size:11px;color:#16a34a;">★ best</span>' : ''}</td>
+            <td><span class="strength-badge ${badgeClass}">${m.mpa.toFixed(1)} MPa</span></td>
+            <td>${getClass(m.mpa)}</td>
+            <td>${m.wc.toFixed(2)}</td>
+            <td>${m.cement.toFixed(0)}</td>
+            <td>${m.water.toFixed(0)}</td>
+            <td>${m.age.toFixed(0)}</td>
+            <td><button class="delete-btn" onclick="deleteMix(${i})">✕</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(document.getElementById('chart'), {
+    type: 'bar',
+    data: {
+      labels: mixes.map(m => m.name),
+      datasets: [{
+        label: 'Strength (MPa)',
+        data: mixes.map(m => m.mpa.toFixed(1)),
+        backgroundColor: mixes.map(m => m.mpa === bestMpa ? '#16a34a' : '#d1d5db'),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { title: { display: true, text: 'MPa' }, min: 0 },
+        x: { ticks: { autoSkip: false } }
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
