@@ -3,159 +3,107 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Futuru — Concrete Mix Optimizer</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <title>Futuru — Smarter Concrete</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
-    header { background: #1a1a1a; color: white; padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1rem; }
-    header h1 { font-size: 1.5rem; font-weight: 600; }
-    header span { font-size: 0.85rem; color: #888; }
-    .container { max-width: 900px; margin: 2rem auto; padding: 0 1.5rem; }
-    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
-    .card h2 { font-size: 0.85rem; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.2rem; }
-    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    .slider-row label { font-size: 14px; color: #555; width: 160px; flex-shrink: 0; }
-    .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
-    .slider-row .val { font-size: 14px; font-weight: 500; min-width: 70px; text-align: right; }
-    .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
-    .metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
-    .metric .num { font-size: 2rem; font-weight: 600; color: #1a1a1a; }
-    .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
-    .metric.highlight .num { color: #16a34a; }
-    .classes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-    .cls { padding: 8px 4px; text-align: center; border-radius: 8px; font-size: 12px; font-weight: 500; border: 1px solid #e5e5e5; color: #888; background: #fafafa; }
-    .cls.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; }
+    nav .links { display: flex; gap: 2rem; }
+    nav .links a { color: #aaa; text-decoration: none; font-size: 14px; }
+    nav .links a:hover { color: white; }
+    .hero { background: #1a1a1a; color: white; text-align: center; padding: 6rem 2rem 5rem; }
+    .hero-tag { display: inline-block; background: #2a2a2a; color: #16a34a; font-size: 12px; font-weight: 500; padding: 4px 14px; border-radius: 20px; margin-bottom: 1.5rem; border: 1px solid #333; }
+    .hero h1 { font-size: 3rem; font-weight: 600; line-height: 1.15; max-width: 620px; margin: 0 auto 1.2rem; }
+    .hero p { font-size: 1.1rem; color: #aaa; max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: #16a34a; color: white; border: none; padding: 14px 28px; border-radius: 8px; font-size: 15px; font-weight: 500; cursor: pointer; text-decoration: none; }
+    .btn-secondary { background: transparent; color: white; border: 1px solid #444; padding: 14px 28px; border-radius: 8px; font-size: 15px; cursor: pointer; text-decoration: none; }
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); background: white; border-bottom: 1px solid #e5e5e5; }
+    .stat { padding: 2.5rem; text-align: center; border-right: 1px solid #e5e5e5; }
+    .stat:last-child { border-right: none; }
+    .stat .num { font-size: 2.2rem; font-weight: 600; color: #1a1a1a; }
+    .stat .lbl { font-size: 13px; color: #888; margin-top: 6px; }
+    .tools { padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
+    .tools h2 { font-size: 13px; font-weight: 500; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 1.5rem; }
+    .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .tool-card { background: white; border: 1px solid #e5e5e5; border-radius: 12px; padding: 1.5rem; }
+    .tool-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; font-size: 20px; }
+    .tool-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+    .tool-card p { font-size: 13px; color: #666; line-height: 1.6; }
+    .badge { display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 20px; margin-top: 12px; font-weight: 500; }
+    .badge-live { background: #dcfce7; color: #16a34a; }
+    .badge-soon { background: #f1f1ee; color: #888; }
+    .cta { background: #1a1a1a; color: white; text-align: center; padding: 5rem 2rem; }
+    .cta h2 { font-size: 2rem; font-weight: 600; margin-bottom: 1rem; }
+    .cta p { color: #aaa; margin-bottom: 2rem; font-size: 1rem; }
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; background: #111; }
   </style>
 </head>
 <body>
-  <header>
-    <div>
-      <h1>Futuru</h1>
-      <span>Concrete Mix Strength Optimizer — EN 206 European Standard</span>
-    </div>
-  </header>
 
-  <div class="container">
-    <div class="metrics">
-      <div class="metric highlight">
-        <div class="num" id="mpa-out">—</div>
-        <div class="lbl">Predicted strength (MPa)</div>
-      </div>
-      <div class="metric">
-        <div class="num" id="class-out">—</div>
-        <div class="lbl">EN 206 strength class</div>
-      </div>
-      <div class="metric">
-        <div class="num" id="wc-out">—</div>
-        <div class="lbl">Water / cement ratio</div>
-      </div>
-    </div>
+<nav>
+  <span class="logo">Futuru</span>
+  <div class="links">
+    <a href="#tools">Tools</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </div>
+</nav>
 
-    <div class="card">
-      <h2>Mix ingredients (kg/m³)</h2>
-      <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
-      <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
-      <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
-      <div class="slider-row"><label>Coarse aggregate</label><input type="range" min="800" max="1100" step="1" value="950" id="coarse"><span class="val"><span id="coarse-v">950</span> kg</span></div>
-      <div class="slider-row"><label>Fly ash</label><input type="range" min="0" max="200" step="1" value="50" id="flyash"><span class="val"><span id="flyash-v">50</span> kg</span></div>
-      <div class="slider-row"><label>Superplasticizer</label><input type="range" min="0" max="20" step="0.5" value="5" id="sp"><span class="val"><span id="sp-v">5.0</span> kg</span></div>
-      <div class="slider-row"><label>Curing age</label><input type="range" min="7" max="90" step="1" value="28" id="age"><span class="val"><span id="age-v">28</span> days</span></div>
-    </div>
+<div class="hero">
+  <div class="hero-tag">ÍST EN 206:2013+A2:2021</div>
+  <h1>Smarter concrete, built on data</h1>
+  <p>Futuru helps engineers design, test, and optimize concrete mixes using Bayesian AI — built for Icelandic standards.</p>
+  <div class="btn-row">
+    <a href="mixer.html" class="btn-primary">Open mix tester</a>
+    <a href="#tools" class="btn-secondary">See all tools</a>
+  </div>
+</div>
 
-    <div class="card">
-      <h2>Strength vs. water/cement ratio</h2>
-      <div style="position:relative;height:250px;">
-        <canvas id="chart"></canvas>
-      </div>
-    </div>
+<div class="stats">
+  <div class="stat"><div class="num">7</div><div class="lbl">Mix parameters</div></div>
+  <div class="stat"><div class="num">6</div><div class="lbl">Certified BM Vallá mixes</div></div>
+  <div class="stat"><div class="num">AI</div><div class="lbl">Bayesian optimization</div></div>
+</div>
 
-    <div class="card">
-      <h2>EN 206 strength classes</h2>
-      <div class="classes" id="classes-grid"></div>
+<div class="tools" id="tools">
+  <h2>Tools</h2>
+  <div class="tools-grid">
+    <div class="tool-card">
+      <div class="tool-icon" style="background:#dcfce7;">⚗️</div>
+      <h3>Mix tester</h3>
+      <p>Enter your ingredients and instantly see predicted strength and certified mix class.</p>
+      <a href="mixer.html"><span class="badge badge-live">Live →</span></a>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:#e0f2fe;">🤖</div>
+      <h3>AI optimizer</h3>
+      <p>Set a target strength class and let Bayesian AI find the optimal mix recipe.</p>
+      <span class="badge badge-soon">Coming soon</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:#fef9c3;">📊</div>
+      <h3>Batch analyzer</h3>
+      <p>Upload multiple mixes and compare strength predictions side by side.</p>
+      <span class="badge badge-soon">Coming soon</span>
+    </div>
+    <div class="tool-card">
+      <div class="tool-icon" style="background:#f3e8ff;">📄</div>
+      <h3>Report export</h3>
+      <p>Generate professional PDF reports of your mix designs and results.</p>
+      <span class="badge badge-soon">Coming soon</span>
     </div>
   </div>
+</div>
 
-  <footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+<div class="cta">
+  <h2>Ready to optimize your mix?</h2>
+  <p>Start with the mix tester — no signup required.</p>
+  <a href="mixer.html" class="btn-primary">Get started</a>
+</div>
 
-  <script>
-    const EN_CLASSES = [
-      {label:'C8/10',min:8},{label:'C12/15',min:12},{label:'C16/20',min:16},
-      {label:'C20/25',min:20},{label:'C25/30',min:25},{label:'C30/37',min:30},
-      {label:'C35/45',min:35},{label:'C40/50',min:40},{label:'C45/55',min:45},
-      {label:'C50/60',min:50},{label:'C55/67',min:55},{label:'C60/75',min:60}
-    ];
+<footer>Futuru © 2026 — Built on BOxCrete open source</footer>
 
-    function predict(cement, water, fine, coarse, flyash, sp, age) {
-      const wc = water / (cement + 0.5 * flyash + 1e-6);
-      const binder = cement + 0.8 * flyash;
-      const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
-      return Math.max(s, 0);
-    }
-
-    function getClass(mpa) {
-      let cls = null;
-      for (const c of EN_CLASSES) { if (mpa >= c.min) cls = c; }
-      return cls ? cls.label : '< C8/10';
-    }
-
-    const ids = ['cement','water','fine','coarse','flyash','sp','age'];
-    const wcRatios = [];
-    for (let r = 0.25; r <= 1.4; r += 0.05) wcRatios.push(Math.round(r*100)/100);
-
-    const chart = new Chart(document.getElementById('chart'), {
-      type: 'line',
-      data: {
-        labels: wcRatios,
-        datasets: [
-          { label: 'Strength (MPa)', data: [], borderColor: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 },
-          { label: 'Your mix', data: [], borderColor: '#16a34a', backgroundColor: '#16a34a', pointRadius: 7, showLine: false }
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { title: { display: true, text: 'Water / cement ratio' } },
-          y: { title: { display: true, text: 'MPa' }, min: 0 }
-        }
-      }
-    });
-
-    function update() {
-      const [cement, water, fine, coarse, flyash, sp, age] = ids.map(id => parseFloat(document.getElementById(id).value));
-      document.getElementById('cement-v').textContent = cement;
-      document.getElementById('water-v').textContent = water;
-      document.getElementById('fine-v').textContent = fine;
-      document.getElementById('coarse-v').textContent = coarse;
-      document.getElementById('flyash-v').textContent = flyash;
-      document.getElementById('sp-v').textContent = sp.toFixed(1);
-      document.getElementById('age-v').textContent = age;
-
-      const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
-      const wc = water / cement;
-      document.getElementById('mpa-out').textContent = mpa.toFixed(1);
-      document.getElementById('class-out').textContent = getClass(mpa);
-      document.getElementById('wc-out').textContent = wc.toFixed(2);
-
-      chart.data.datasets[0].data = wcRatios.map(r => predict(cement, r*cement, fine, coarse, flyash, sp, age).toFixed(1));
-      chart.data.datasets[1].data = wcRatios.map(r => Math.abs(r - wc) < 0.025 ? mpa.toFixed(1) : null);
-      chart.update('none');
-
-      const grid = document.getElementById('classes-grid');
-      grid.innerHTML = '';
-      const active = getClass(mpa);
-      EN_CLASSES.forEach(c => {
-        const div = document.createElement('div');
-        div.className = 'cls' + (c.label === active ? ' active' : '');
-        div.textContent = c.label;
-        grid.appendChild(div);
-      });
-    }
-
-    ids.forEach(id => document.getElementById(id).addEventListener('input', update));
-    update();
-  </script>
 </body>
 </html>
