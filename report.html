@@ -20,19 +20,19 @@
     .form-field input, .form-field select, .form-field textarea { padding: 8px 10px; border: 1px solid #e5e5e5; border-radius: 8px; font-size: 13px; font-family: system-ui, sans-serif; }
     .form-field input:focus, .form-field select:focus, .form-field textarea:focus { outline: none; border-color: #1a1a1a; }
     .form-field textarea { resize: vertical; min-height: 80px; }
-    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-    .slider-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
-    .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
-    .slider-row .val { font-size: 13px; font-weight: 500; min-width: 65px; text-align: right; }
+    .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; justify-content: center; }
+    .input-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
+    .input-row .unit { font-size: 13px; color: #888; min-width: 35px; }
+    .num-input { width: 110px; padding: 8px 12px; border: 1.5px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 500; color: #1a1a1a; background: #fafafa; transition: border-color 0.15s, background 0.15s; -moz-appearance: textfield; }
+    .num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-input:focus { outline: none; border-color: #1a1a1a; background: white; }
     .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
     .metric { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px; padding: 1rem; text-align: center; }
     .metric .num { font-size: 1.6rem; font-weight: 600; }
     .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
-    .metric.good .num { color: #16a34a; }
+    .metric.good .num { color: #3a7d44; }
     .export-btn { width: 100%; padding: 1rem; background: #1a1a1a; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer; }
     .export-btn:hover { background: #333; }
-
-    /* Print/PDF styles */
     @media print {
       nav, .no-print { display: none !important; }
       body { background: white; }
@@ -44,7 +44,6 @@
     .print-header { display: none; border-bottom: 2px solid #1a1a1a; padding-bottom: 1rem; margin-bottom: 1.5rem; }
     .print-header h1 { font-size: 1.5rem; }
     .print-header p { font-size: 13px; color: #666; margin-top: 4px; }
-
     footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
   </style>
 </head>
@@ -96,13 +95,13 @@
 
   <div class="card">
     <p class="card-title">Mix ingredients (kg/m³)</p>
-    <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
-    <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
-    <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
-    <div class="slider-row"><label>Coarse aggregate</label><input type="range" min="800" max="1100" step="1" value="950" id="coarse"><span class="val"><span id="coarse-v">950</span> kg</span></div>
-    <div class="slider-row"><label>Fly ash</label><input type="range" min="0" max="200" step="1" value="50" id="flyash"><span class="val"><span id="flyash-v">50</span> kg</span></div>
-    <div class="slider-row"><label>Superplasticizer</label><input type="range" min="0" max="20" step="0.5" value="5" id="sp"><span class="val"><span id="sp-v">5.0</span> kg</span></div>
-    <div class="slider-row"><label>Curing age</label><input type="range" min="7" max="90" step="1" value="28" id="age"><span class="val"><span id="age-v">28</span> days</span></div>
+    <div class="input-row"><label>Cement</label><input type="number" class="num-input" id="cement" value="350" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Water</label><input type="number" class="num-input" id="water" value="175" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Fine aggregate</label><input type="number" class="num-input" id="fine" value="750" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Coarse aggregate</label><input type="number" class="num-input" id="coarse" value="950" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Fly ash</label><input type="number" class="num-input" id="flyash" value="50" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Superplasticizer</label><input type="number" class="num-input" id="sp" value="5" min="1" max="10000" step="0.5"><span class="unit">kg</span></div>
+    <div class="input-row"><label>Curing age</label><input type="number" class="num-input" id="age" value="28" min="1" max="10000" step="1"><span class="unit">days</span></div>
   </div>
 
   <div class="metrics">
@@ -162,13 +161,6 @@ const ids = ['cement','water','fine','coarse','flyash','sp','age'];
 
 function update() {
   const [cement, water, fine, coarse, flyash, sp, age] = ids.map(id => parseFloat(document.getElementById(id).value));
-  document.getElementById('cement-v').textContent = cement;
-  document.getElementById('water-v').textContent = water;
-  document.getElementById('fine-v').textContent = fine;
-  document.getElementById('coarse-v').textContent = coarse;
-  document.getElementById('flyash-v').textContent = flyash;
-  document.getElementById('sp-v').textContent = sp.toFixed(1);
-  document.getElementById('age-v').textContent = age;
 
   const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
   const wc = water / cement;
@@ -237,7 +229,7 @@ function update() {
 
     <p style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:8px;">Results</p>
     <table style="width:100%;border-collapse:collapse;font-size:13px;">
-      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Predicted strength</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;color:#16a34a;">${mpa.toFixed(1)} MPa</td></tr>
+      <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Predicted strength</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;color:#3a7d44;">${mpa.toFixed(1)} MPa</td></tr>
       <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Certified class</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${certClass ? certClass.strength : '—'}</td></tr>
       <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Exposure class</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${certClass ? certClass.exposure : '—'}</td></tr>
       <tr><td style="padding:8px;border:1px solid #e5e5e5;color:#888;">Water/cement ratio</td><td style="padding:8px;border:1px solid #e5e5e5;font-weight:600;">${wc.toFixed(2)}</td></tr>
