@@ -32,7 +32,7 @@
     .metric.info .num { color: #0369a1; }
 
     /* Number input rows */
-    .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; justify-content: center; }
     .input-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
     .input-row .unit { font-size: 13px; color: #888; min-width: 35px; }
     .num-input {
@@ -127,50 +127,50 @@
   </div>
 
   <!-- Step 3: Number inputs -->
-  <div class="card" id="step3-card" style="opacity:0.4; pointer-events:none;">
+  <div class="card" id="step3-card" style="opacity:0.4; pointer-events:none; text-align:center;">
     <p class="card-title">Step 3 — Enter your mix ingredients (kg/m³)</p>
 
     <div class="input-row">
       <label>Cement</label>
-      <input type="number" class="num-input" id="cement" value="350" min="150" max="450" step="1">
+      <input type="number" class="num-input" id="cement" value="350" min="1" max="10000" step="1">
       <span class="unit">kg</span>
-      <span class="input-hint">150 – 450</span>
+      
     </div>
     <div class="input-row">
       <label>Water</label>
-      <input type="number" class="num-input" id="water" value="175" min="120" max="220" step="1">
+      <input type="number" class="num-input" id="water" value="175" min="1" max="10000" step="1">
       <span class="unit">kg</span>
-      <span class="input-hint">120 – 220</span>
+      
     </div>
     <div class="input-row">
       <label>Fine aggregate</label>
-      <input type="number" class="num-input" id="fine" value="750" min="600" max="900" step="1">
+      <input type="number" class="num-input" id="fine" value="750" min="1" max="10000" step="1">
       <span class="unit">kg</span>
-      <span class="input-hint">600 – 900</span>
+      
     </div>
     <div class="input-row">
       <label>Coarse aggregate</label>
-      <input type="number" class="num-input" id="coarse" value="950" min="800" max="1100" step="1">
+      <input type="number" class="num-input" id="coarse" value="950" min="1" max="10000" step="1">
       <span class="unit">kg</span>
-      <span class="input-hint">800 – 1100</span>
+      
     </div>
     <div class="input-row">
       <label>Fly ash</label>
-      <input type="number" class="num-input" id="flyash" value="50" min="0" max="200" step="1">
+      <input type="number" class="num-input" id="flyash" value="50" min="1" max="10000" step="1">
       <span class="unit">kg</span>
-      <span class="input-hint">0 – 200</span>
+      
     </div>
     <div class="input-row">
       <label>Superplasticizer</label>
-      <input type="number" class="num-input" id="sp" value="5" min="0" max="20" step="0.5">
+      <input type="number" class="num-input" id="sp" value="5" min="1" max="10000" step="0.5">
       <span class="unit">kg</span>
-      <span class="input-hint">0 – 20</span>
+      
     </div>
     <div class="input-row">
       <label>Curing age</label>
-      <input type="number" class="num-input" id="age" value="28" min="7" max="90" step="1">
+      <input type="number" class="num-input" id="age" value="28" min="1" max="10000" step="1">
       <span class="unit">days</span>
-      <span class="input-hint">7 – 90</span>
+      
     </div>
   </div>
 
@@ -282,7 +282,7 @@ function getVal(id) {
   const val = parseFloat(el.value);
   const min = parseFloat(el.min);
   const max = parseFloat(el.max);
-  if (isNaN(val) || val < min || val > max) {
+  if (isNaN(val) || val <= 0) {
     el.classList.add('error');
     return null;
   }
