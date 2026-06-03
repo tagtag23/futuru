@@ -28,12 +28,31 @@
     .metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
     .metric .num { font-size: 1.8rem; font-weight: 600; }
     .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
-    .metric.good .num { color: #16a34a; }
+    .metric.good .num { color: #3a7d44; }
     .metric.info .num { color: #0369a1; }
-    .slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    .slider-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
-    .slider-row input[type=range] { flex: 1; accent-color: #1a1a1a; }
-    .slider-row .val { font-size: 13px; font-weight: 500; min-width: 65px; text-align: right; }
+
+    /* Number input rows */
+    .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .input-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
+    .input-row .unit { font-size: 13px; color: #888; min-width: 35px; }
+    .num-input {
+      width: 110px;
+      padding: 8px 12px;
+      border: 1.5px solid #e5e5e5;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #1a1a1a;
+      background: #fafafa;
+      transition: border-color 0.15s, background 0.15s;
+      -moz-appearance: textfield;
+    }
+    .num-input::-webkit-outer-spin-button,
+    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-input:focus { outline: none; border-color: #1a1a1a; background: white; }
+    .num-input.error { border-color: #ef4444; background: #fef2f2; }
+    .input-hint { font-size: 11px; color: #bbb; margin-left: 4px; }
+
     .mix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
     .mix-item { padding: 10px 12px; border-radius: 8px; border: 1px solid #e5e5e5; background: #fafafa; }
     .mix-item.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
@@ -107,16 +126,52 @@
     <div class="metric"><div class="num" id="wc-out">—</div><div class="lbl">Water / cement ratio</div></div>
   </div>
 
-  <!-- Step 3: Sliders -->
+  <!-- Step 3: Number inputs -->
   <div class="card" id="step3-card" style="opacity:0.4; pointer-events:none;">
-    <p class="card-title">Step 3 — Adjust your mix ingredients (kg/m³)</p>
-    <div class="slider-row"><label>Cement</label><input type="range" min="150" max="450" step="1" value="350" id="cement"><span class="val"><span id="cement-v">350</span> kg</span></div>
-    <div class="slider-row"><label>Water</label><input type="range" min="120" max="220" step="1" value="175" id="water"><span class="val"><span id="water-v">175</span> kg</span></div>
-    <div class="slider-row"><label>Fine aggregate</label><input type="range" min="600" max="900" step="1" value="750" id="fine"><span class="val"><span id="fine-v">750</span> kg</span></div>
-    <div class="slider-row"><label>Coarse aggregate</label><input type="range" min="800" max="1100" step="1" value="950" id="coarse"><span class="val"><span id="coarse-v">950</span> kg</span></div>
-    <div class="slider-row"><label>Fly ash</label><input type="range" min="0" max="200" step="1" value="50" id="flyash"><span class="val"><span id="flyash-v">50</span> kg</span></div>
-    <div class="slider-row"><label>Superplasticizer</label><input type="range" min="0" max="20" step="0.5" value="5" id="sp"><span class="val"><span id="sp-v">5.0</span> kg</span></div>
-    <div class="slider-row"><label>Curing age</label><input type="range" min="7" max="90" step="1" value="28" id="age"><span class="val"><span id="age-v">28</span> days</span></div>
+    <p class="card-title">Step 3 — Enter your mix ingredients (kg/m³)</p>
+
+    <div class="input-row">
+      <label>Cement</label>
+      <input type="number" class="num-input" id="cement" value="350" min="150" max="450" step="1">
+      <span class="unit">kg</span>
+      <span class="input-hint">150 – 450</span>
+    </div>
+    <div class="input-row">
+      <label>Water</label>
+      <input type="number" class="num-input" id="water" value="175" min="120" max="220" step="1">
+      <span class="unit">kg</span>
+      <span class="input-hint">120 – 220</span>
+    </div>
+    <div class="input-row">
+      <label>Fine aggregate</label>
+      <input type="number" class="num-input" id="fine" value="750" min="600" max="900" step="1">
+      <span class="unit">kg</span>
+      <span class="input-hint">600 – 900</span>
+    </div>
+    <div class="input-row">
+      <label>Coarse aggregate</label>
+      <input type="number" class="num-input" id="coarse" value="950" min="800" max="1100" step="1">
+      <span class="unit">kg</span>
+      <span class="input-hint">800 – 1100</span>
+    </div>
+    <div class="input-row">
+      <label>Fly ash</label>
+      <input type="number" class="num-input" id="flyash" value="50" min="0" max="200" step="1">
+      <span class="unit">kg</span>
+      <span class="input-hint">0 – 200</span>
+    </div>
+    <div class="input-row">
+      <label>Superplasticizer</label>
+      <input type="number" class="num-input" id="sp" value="5" min="0" max="20" step="0.5">
+      <span class="unit">kg</span>
+      <span class="input-hint">0 – 20</span>
+    </div>
+    <div class="input-row">
+      <label>Curing age</label>
+      <input type="number" class="num-input" id="age" value="28" min="7" max="90" step="1">
+      <span class="unit">days</span>
+      <span class="input-hint">7 – 90</span>
+    </div>
   </div>
 
   <!-- Chart -->
@@ -209,7 +264,7 @@ const chart = new Chart(document.getElementById('chart'), {
     labels: wcRatios,
     datasets: [
       { data: [], borderColor: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 },
-      { data: [], borderColor: '#16a34a', backgroundColor: '#16a34a', pointRadius: 7, showLine: false }
+      { data: [], borderColor: '#3a7d44', backgroundColor: '#3a7d44', pointRadius: 7, showLine: false }
     ]
   },
   options: {
@@ -222,15 +277,23 @@ const chart = new Chart(document.getElementById('chart'), {
   }
 });
 
+function getVal(id) {
+  const el = document.getElementById(id);
+  const val = parseFloat(el.value);
+  const min = parseFloat(el.min);
+  const max = parseFloat(el.max);
+  if (isNaN(val) || val < min || val > max) {
+    el.classList.add('error');
+    return null;
+  }
+  el.classList.remove('error');
+  return val;
+}
+
 function update() {
-  const [cement, water, fine, coarse, flyash, sp, age] = ids.map(id => parseFloat(document.getElementById(id).value));
-  document.getElementById('cement-v').textContent = cement;
-  document.getElementById('water-v').textContent = water;
-  document.getElementById('fine-v').textContent = fine;
-  document.getElementById('coarse-v').textContent = coarse;
-  document.getElementById('flyash-v').textContent = flyash;
-  document.getElementById('sp-v').textContent = sp.toFixed(1);
-  document.getElementById('age-v').textContent = age;
+  const vals = ids.map(id => getVal(id));
+  if (vals.some(v => v === null)) return;
+  const [cement, water, fine, coarse, flyash, sp, age] = vals;
 
   const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
   const wc = water / cement;
