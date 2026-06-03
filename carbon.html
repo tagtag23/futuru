@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Futuru — CO₂ & Cost Tracker</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+    nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+    nav .back:hover { color: white; }
+
+    .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    .page-header { margin-bottom: 1.8rem; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+    .page-header p { font-size: 14px; color: #666; }
+
+    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+    .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
+
+    /* Pour size */
+    .pour-row { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .pour-row label { font-size: 14px; color: #555; font-weight: 500; }
+    .pour-presets { display: flex; gap: 8px; flex-wrap: wrap; }
+    .preset-btn { padding: 6px 14px; border-radius: 20px; border: 1.5px solid #e5e5e5; background: white; font-size: 13px; cursor: pointer; transition: all 0.15s; }
+    .preset-btn:hover { border-color: #aaa; }
+    .preset-btn.active { border-color: #1a1a1a; background: #1a1a1a; color: white; }
+    .num-input {
+      width: 110px; padding: 8px 12px; border: 1.5px solid #e5e5e5;
+      border-radius: 8px; font-size: 14px; font-weight: 500; color: #1a1a1a;
+      background: #fafafa; transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+    .num-input::-webkit-outer-spin-button,
+    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .num-input:focus { outline: none; border-color: #1a1a1a; background: white; }
+
+    /* Mix inputs */
+    .mix-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mix-group { display: flex; flex-direction: column; gap: 6px; }
+    .mix-group label { font-size: 12px; color: #888; font-weight: 500; }
+    .mix-row { display: flex; align-items: center; gap: 8px; }
+    .mix-row .unit { font-size: 13px; color: #aaa; min-width: 28px; }
+    .mix-divider { display: flex; align-items: center; gap: 12px; margin: 1rem 0 0.5rem; }
+    .mix-divider span { font-size: 11px; color: #bbb; white-space: nowrap; }
+    .mix-divider hr { flex: 1; border: none; border-top: 1px solid #eee; }
+
+    /* Big metrics row */
+    .metrics-hero { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+    .metric-hero { border-radius: 12px; padding: 1.4rem 1.2rem; border: 1px solid #e5e5e5; text-align: center; background: white; transition: transform 0.2s; }
+    .metric-hero:hover { transform: translateY(-2px); }
+    .metric-hero .hero-num { font-size: 2rem; font-weight: 700; line-height: 1; }
+    .metric-hero .hero-unit { font-size: 12px; font-weight: 600; margin-top: 2px; opacity: 0.7; }
+    .metric-hero .hero-lbl { font-size: 12px; color: #888; margin-top: 6px; }
+    .metric-hero.green { background: #f0fdf4; border-color: #86efac; }
+    .metric-hero.green .hero-num { color: #16a34a; }
+    .metric-hero.green .hero-unit { color: #16a34a; }
+    .metric-hero.blue { background: #eff6ff; border-color: #93c5fd; }
+    .metric-hero.blue .hero-num { color: #1d4ed8; }
+    .metric-hero.blue .hero-unit { color: #1d4ed8; }
+    .metric-hero.amber { background: #fffbeb; border-color: #fcd34d; }
+    .metric-hero.amber .hero-num { color: #d97706; }
+    .metric-hero.amber .hero-unit { color: #d97706; }
+
+    /* Savings banner */
+    .savings-banner { border-radius: 12px; padding: 1.2rem 1.5rem; margin-bottom: 1.5rem; background: #f0fdf4; border: 1px solid #86efac; display: none; }
+    .savings-banner.show { display: block; }
+    .savings-banner .banner-top { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 1rem; }
+    .savings-banner .banner-title { font-size: 15px; font-weight: 700; color: #15803d; }
+    .savings-banner .banner-sub { font-size: 13px; color: #166534; }
+    .savings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+    .saving-item { background: white; border-radius: 8px; padding: 10px 12px; border: 1px solid #bbf7d0; }
+    .saving-item .s-num { font-size: 1.1rem; font-weight: 700; color: #15803d; }
+    .saving-item .s-lbl { font-size: 11px; color: #666; margin-top: 2px; }
+
+    /* Warning banner */
+    .warn-banner { border-radius: 12px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; background: #fffbeb; border: 1px solid #fcd34d; display: none; }
+    .warn-banner.show { display: block; }
+    .warn-banner p { font-size: 14px; color: #92400e; font-weight: 500; }
+    .warn-banner span { font-size: 13px; color: #78350f; }
+
+    /* Breakdown table */
+    .breakdown { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .breakdown th { text-align: left; padding: 8px 12px; background: #f9f9f9; font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #eee; }
+    .breakdown td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    .breakdown tr:last-child td { border-bottom: none; }
+    .breakdown .total-row td { font-weight: 700; background: #f9f9f9; border-top: 2px solid #e5e5e5; }
+    .co2-bar { height: 6px; border-radius: 3px; background: #e5e5e5; margin-top: 4px; }
+    .co2-bar-fill { height: 100%; border-radius: 3px; background: #16a34a; transition: width 0.4s ease; }
+    .co2-val { color: #16a34a; font-weight: 600; }
+    .cost-val { color: #1d4ed8; font-weight: 600; }
+
+    /* Chart */
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* Heidelberg callout */
+    .hd-callout { background: #1a1a1a; color: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    .hd-callout .hd-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 1rem; }
+    .hd-callout .hd-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .hd-callout .hd-sub { font-size: 12px; color: #aaa; }
+    .hd-callout .hd-badge { font-size: 10px; font-weight: 700; background: #16a34a; color: white; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+    .hd-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .hd-stat { background: #2a2a2a; border-radius: 8px; padding: 10px 12px; }
+    .hd-stat .hs-num { font-size: 1.1rem; font-weight: 700; color: #4ade80; }
+    .hd-stat .hs-lbl { font-size: 11px; color: #888; margin-top: 2px; }
+
+    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+
+    @media (max-width: 600px) {
+      .metrics-hero { grid-template-columns: 1fr; }
+      .mix-inputs { grid-template-columns: 1fr; }
+      .hd-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Futuru</a>
+  <a href="index.html" class="back">← Back to home</a>
+</nav>
+
+<div class="container">
+
+  <div class="page-header">
+    <h1>CO₂ & Cost Tracker</h1>
+    <p>Calculate the carbon footprint and material cost of your concrete mix — and see the savings from optimization.</p>
+  </div>
+
+  <!-- Pour size -->
+  <div class="card">
+    <p class="card-title">Step 1 — How large is the pour?</p>
+    <div class="pour-row">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="number" class="num-input" id="pour-vol" value="100" min="1" max="100000" step="1">
+        <span style="font-size:14px;color:#888;">m³</span>
+      </div>
+      <div class="pour-presets">
+        <button class="preset-btn" onclick="setPour(50)">50 m³</button>
+        <button class="preset-btn active" onclick="setPour(100)">100 m³</button>
+        <button class="preset-btn" onclick="setPour(250)">250 m³</button>
+        <button class="preset-btn" onclick="setPour(500)">500 m³</button>
+        <button class="preset-btn" onclick="setPour(1000)">1,000 m³</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mix inputs: Your mix vs Standard -->
+  <div class="card">
+    <p class="card-title">Step 2 — Enter mix ingredients (kg/m³)</p>
+    <div class="mix-inputs">
+
+      <!-- Your mix -->
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#1a1a1a;">Your mix</div>
+
+        <div class="mix-group">
+          <label>Cement</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-cement" value="350" min="0" max="600" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-divider"><hr><span>Supplementary materials</span><hr></div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Fly ash</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-flyash" value="50" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Slag (GGBS)</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-slag" value="0" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-divider"><hr><span>Aggregates & water</span><hr></div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Fine aggregate</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-fine" value="750" min="0" max="1200" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Coarse aggregate</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-coarse" value="950" min="0" max="1400" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group">
+          <label>Water</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="y-water" value="175" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Standard mix -->
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px;color:#555;">Standard reference mix <span style="font-size:11px;font-weight:400;color:#aaa;">(edit to compare)</span></div>
+
+        <div class="mix-group">
+          <label>Cement</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-cement" value="400" min="0" max="600" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-divider"><hr><span>Supplementary materials</span><hr></div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Fly ash</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-flyash" value="0" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Slag (GGBS)</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-slag" value="0" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-divider"><hr><span>Aggregates & water</span><hr></div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Fine aggregate</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-fine" value="750" min="0" max="1200" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group" style="margin-bottom:10px;">
+          <label>Coarse aggregate</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-coarse" value="950" min="0" max="1400" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+        <div class="mix-group">
+          <label>Water</label>
+          <div class="mix-row">
+            <input type="number" class="num-input" id="s-water" value="185" min="0" max="300" step="1">
+            <span class="unit">kg</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hero metrics -->
+  <div class="metrics-hero">
+    <div class="metric-hero green">
+      <div class="hero-num" id="co2-per-m3">—</div>
+      <div class="hero-unit">kg CO₂ / m³</div>
+      <div class="hero-lbl">Your mix carbon intensity</div>
+    </div>
+    <div class="metric-hero blue">
+      <div class="hero-num" id="cost-per-m3">—</div>
+      <div class="hero-unit">€ / m³</div>
+      <div class="hero-lbl">Estimated material cost</div>
+    </div>
+    <div class="metric-hero amber">
+      <div class="hero-num" id="total-co2">—</div>
+      <div class="hero-unit">tonnes CO₂</div>
+      <div class="hero-lbl">Total pour footprint</div>
+    </div>
+  </div>
+
+  <!-- Savings banner -->
+  <div class="savings-banner" id="savings-banner">
+    <div class="banner-top">
+      <div>
+        <div class="banner-title" id="savings-title">✓ Your mix is more sustainable than the reference</div>
+        <div class="banner-sub" id="savings-sub"></div>
+      </div>
+    </div>
+    <div class="savings-grid">
+      <div class="saving-item">
+        <div class="s-num" id="sv-co2-m3">—</div>
+        <div class="s-lbl">kg CO₂ saved per m³</div>
+      </div>
+      <div class="saving-item">
+        <div class="s-num" id="sv-co2-total">—</div>
+        <div class="s-lbl">tonnes CO₂ saved total</div>
+      </div>
+      <div class="saving-item">
+        <div class="s-num" id="sv-cost-m3">—</div>
+        <div class="s-lbl">€ saved per m³</div>
+      </div>
+      <div class="saving-item">
+        <div class="s-num" id="sv-cost-total">—</div>
+        <div class="s-lbl">€ saved total pour</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Warn banner (mix worse than reference) -->
+  <div class="warn-banner" id="warn-banner">
+    <p>⚠ Your mix has a higher carbon footprint than the reference</p>
+    <span id="warn-sub"></span>
+  </div>
+
+  <!-- CO2 breakdown -->
+  <div class="card">
+    <p class="card-title">CO₂ breakdown by ingredient — your mix</p>
+    <table class="breakdown" id="breakdown-table">
+      <thead>
+        <tr>
+          <th>Ingredient</th>
+          <th>kg/m³</th>
+          <th>CO₂ factor</th>
+          <th>kg CO₂/m³</th>
+          <th style="width:120px;">Share</th>
+        </tr>
+      </thead>
+      <tbody id="breakdown-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Chart: your mix vs standard -->
+  <div class="card">
+    <p class="card-title">CO₂ comparison — your mix vs reference</p>
+    <div class="chart-wrap">
+      <canvas id="co2-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Heidelberg Transformation Accelerator callout -->
+  <div class="hd-callout" id="hd-callout">
+    <div class="hd-top">
+      <div>
+        <div class="hd-title">Heidelberg Materials — Transformation Accelerator</div>
+        <div class="hd-sub">How this pour contributes to group CO₂ reduction targets</div>
+      </div>
+      <div class="hd-badge">ESG Reporting</div>
+    </div>
+    <div class="hd-stats">
+      <div class="hd-stat">
+        <div class="hs-num" id="hd-saving">—</div>
+        <div class="hs-lbl">kg CO₂ saved this pour</div>
+      </div>
+      <div class="hd-stat">
+        <div class="hs-num" id="hd-cement-saved">—</div>
+        <div class="hs-lbl">kg cement reduced</div>
+      </div>
+      <div class="hd-stat">
+        <div class="hs-num" id="hd-trees">—</div>
+        <div class="hs-lbl">equivalent trees planted</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+
+<script>
+// ── CO₂ emission factors (kg CO₂ per kg material) ──────────────
+// Sources: ICE Database v3.0, IPCC, EN 15804
+const CO2_FACTORS = {
+  cement:  0.820,   // Portland cement — dominant source
+  flyash:  0.027,   // Fly ash — very low (industrial byproduct)
+  slag:    0.083,   // GGBS slag — low (byproduct of steel)
+  fine:    0.0048,  // Fine aggregate (sand)
+  coarse:  0.0048,  // Coarse aggregate (gravel/basalt)
+  water:   0.0003   // Water (treatment & pumping)
+};
+
+// ── Material cost factors (€ per kg) — Iceland market estimates ─
+const COST_FACTORS = {
+  cement:  0.12,
+  flyash:  0.04,
+  slag:    0.06,
+  fine:    0.018,
+  coarse:  0.016,
+  water:   0.0008
+};
+
+const INGREDIENTS = [
+  { id: 'cement',  label: 'Cement (OPC)',      co2: CO2_FACTORS.cement,  cost: COST_FACTORS.cement  },
+  { id: 'flyash',  label: 'Fly ash',           co2: CO2_FACTORS.flyash,  cost: COST_FACTORS.flyash  },
+  { id: 'slag',    label: 'Slag (GGBS)',       co2: CO2_FACTORS.slag,    cost: COST_FACTORS.slag    },
+  { id: 'fine',    label: 'Fine aggregate',    co2: CO2_FACTORS.fine,    cost: COST_FACTORS.fine    },
+  { id: 'coarse',  label: 'Coarse aggregate',  co2: CO2_FACTORS.coarse,  cost: COST_FACTORS.coarse  },
+  { id: 'water',   label: 'Water',             co2: CO2_FACTORS.water,   cost: COST_FACTORS.water   }
+];
+
+// Chart setup
+const chart = new Chart(document.getElementById('co2-chart'), {
+  type: 'bar',
+  data: {
+    labels: INGREDIENTS.map(i => i.label),
+    datasets: [
+      { label: 'Your mix',  data: [], backgroundColor: '#16a34a', borderRadius: 6 },
+      { label: 'Reference', data: [], backgroundColor: '#e5e5e5', borderRadius: 6 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'top', labels: { boxWidth: 12, font: { size: 12 } } } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { title: { display: true, text: 'kg CO₂ / m³' }, beginAtZero: true }
+    }
+  }
+});
+
+function getVal(id) {
+  const v = parseFloat(document.getElementById(id).value);
+  return isNaN(v) || v < 0 ? 0 : v;
+}
+
+function setPour(v) {
+  document.getElementById('pour-vol').value = v;
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.textContent) === v || b.textContent.includes(v.toLocaleString()));
+  });
+  update();
+}
+
+function calcMix(prefix) {
+  const vals = {};
+  INGREDIENTS.forEach(ing => { vals[ing.id] = getVal(prefix + ing.id); });
+  let totalCo2 = 0, totalCost = 0;
+  INGREDIENTS.forEach(ing => {
+    totalCo2  += vals[ing.id] * ing.co2;
+    totalCost += vals[ing.id] * ing.cost;
+  });
+  return { vals, totalCo2, totalCost };
+}
+
+function update() {
+  const vol    = getVal('pour-vol') || 100;
+  const yours  = calcMix('y-');
+  const std    = calcMix('s-');
+
+  // Hero metrics
+  document.getElementById('co2-per-m3').textContent  = yours.totalCo2.toFixed(1);
+  document.getElementById('cost-per-m3').textContent = yours.totalCost.toFixed(2);
+  document.getElementById('total-co2').textContent   = (yours.totalCo2 * vol / 1000).toFixed(2);
+
+  // Savings banners
+  const co2Diff  = std.totalCo2  - yours.totalCo2;
+  const costDiff = std.totalCost - yours.totalCost;
+  const savingsBanner = document.getElementById('savings-banner');
+  const warnBanner    = document.getElementById('warn-banner');
+
+  if (co2Diff > 0.5) {
+    savingsBanner.classList.add('show');
+    warnBanner.classList.remove('show');
+    document.getElementById('sv-co2-m3').textContent    = co2Diff.toFixed(1);
+    document.getElementById('sv-co2-total').textContent = (co2Diff * vol / 1000).toFixed(2);
+    document.getElementById('sv-cost-m3').textContent   = costDiff > 0 ? '€' + costDiff.toFixed(2) : '—';
+    document.getElementById('sv-cost-total').textContent = costDiff > 0 ? '€' + (costDiff * vol).toFixed(0) : '—';
+    document.getElementById('savings-title').textContent = '✓ Your mix is more sustainable than the reference';
+    document.getElementById('savings-sub').textContent  =
+      `Saving ${co2Diff.toFixed(1)} kg CO₂/m³ — ${(co2Diff * vol / 1000).toFixed(2)} tonnes total for this pour`;
+  } else if (co2Diff < -0.5) {
+    savingsBanner.classList.remove('show');
+    warnBanner.classList.add('show');
+    document.getElementById('warn-sub').textContent =
+      `Your mix emits ${Math.abs(co2Diff).toFixed(1)} kg CO₂/m³ more than the reference. Consider replacing cement with fly ash or slag.`;
+  } else {
+    savingsBanner.classList.remove('show');
+    warnBanner.classList.remove('show');
+  }
+
+  // Breakdown table
+  const tbody = document.getElementById('breakdown-body');
+  tbody.innerHTML = '';
+  let totalCo2 = yours.totalCo2;
+  let totalCostRow = yours.totalCost;
+
+  INGREDIENTS.forEach(ing => {
+    const kg   = yours.vals[ing.id];
+    const co2v = kg * ing.co2;
+    const pct  = totalCo2 > 0 ? (co2v / totalCo2 * 100) : 0;
+    if (kg === 0) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${ing.label}</td>
+      <td>${kg}</td>
+      <td style="color:#888;">${ing.co2} kg/kg</td>
+      <td class="co2-val">${co2v.toFixed(2)}</td>
+      <td>
+        <div style="font-size:11px;color:#888;">${pct.toFixed(0)}%</div>
+        <div class="co2-bar"><div class="co2-bar-fill" style="width:${pct}%"></div></div>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Total row
+  const ttr = document.createElement('tr');
+  ttr.className = 'total-row';
+  ttr.innerHTML = `
+    <td>Total</td>
+    <td>—</td>
+    <td>—</td>
+    <td class="co2-val">${totalCo2.toFixed(2)}</td>
+    <td><div style="font-size:11px;font-weight:600;">${totalCo2.toFixed(2)} kg/m³</div></td>`;
+  tbody.appendChild(ttr);
+
+  // Chart data
+  chart.data.datasets[0].data = INGREDIENTS.map(ing => (yours.vals[ing.id] * ing.co2).toFixed(3));
+  chart.data.datasets[1].data = INGREDIENTS.map(ing => (std.vals[ing.id]   * ing.co2).toFixed(3));
+  chart.update('none');
+
+  // Heidelberg callout
+  const co2SavedTotal   = co2Diff * vol;
+  const cementSaved     = (getVal('s-cement') - getVal('y-cement')) * vol;
+  const treesEquiv      = Math.max(0, (co2SavedTotal / 21)).toFixed(0); // ~21kg CO2 per tree/year
+  document.getElementById('hd-saving').textContent       = co2SavedTotal > 0 ? (co2SavedTotal / 1000).toFixed(2) + ' t' : '0 t';
+  document.getElementById('hd-cement-saved').textContent = cementSaved > 0 ? cementSaved.toFixed(0) + ' kg' : '0 kg';
+  document.getElementById('hd-trees').textContent        = treesEquiv;
+}
+
+// Wire all inputs
+document.querySelectorAll('.num-input').forEach(el => el.addEventListener('input', update));
+document.getElementById('pour-vol').addEventListener('input', update);
+
+update();
+</script>
+</body>
+</html>
