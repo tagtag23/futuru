@@ -1,199 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Futuru — Mix Tester</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
-    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
-    nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
-    nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
-    nav .back:hover { color: white; }
-    .container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
-    .card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
-    .card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
-    .btn-grid { display: grid; gap: 12px; }
-    .btn-grid.cols2 { grid-template-columns: 1fr 1fr; }
-    .sel-btn { padding: 1rem 1.2rem; border-radius: 10px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: left; transition: all 0.15s; }
-    .sel-btn:hover { border-color: #aaa; }
-    .sel-btn.active { border-color: #1a1a1a; background: #1a1a1a; color: white; }
-    .sel-btn.active-blue { border-color: #0369a1; background: #0369a1; color: white; }
-    .sel-btn .btn-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
-    .sel-btn .btn-sub { font-size: 12px; opacity: 0.7; }
-    .sel-btn .btn-std { font-size: 11px; opacity: 0.6; margin-top: 6px; }
-    .metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
-    .metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
-    .metric .num { font-size: 1.8rem; font-weight: 600; }
-    .metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
-    .metric.good .num { color: #3a7d44; }
-    .metric.info .num { color: #0369a1; }
-
-    /* Number input rows */
-    .input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; justify-content: center; }
-    .input-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
-    .input-row .unit { font-size: 13px; color: #888; min-width: 35px; }
-    .num-input {
-      width: 110px;
-      padding: 8px 12px;
-      border: 1.5px solid #e5e5e5;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #1a1a1a;
-      background: #fafafa;
-      transition: border-color 0.15s, background 0.15s;
-      -moz-appearance: textfield;
-    }
-    .num-input::-webkit-outer-spin-button,
-    .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .num-input:focus { outline: none; border-color: #1a1a1a; background: white; }
-    .num-input.error { border-color: #ef4444; background: #fef2f2; }
-    .input-hint { font-size: 11px; color: #bbb; margin-left: 4px; }
-
-    .mix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
-    .mix-item { padding: 10px 12px; border-radius: 8px; border: 1px solid #e5e5e5; background: #fafafa; }
-    .mix-item.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
-    .mix-item.active-blue { background: #0369a1; border-color: #0369a1; color: white; }
-    .mix-item .mix-strength { font-size: 14px; font-weight: 600; }
-    .mix-item .mix-exposure { font-size: 11px; opacity: 0.7; margin-top: 2px; }
-    .mix-item .mix-use { font-size: 10px; opacity: 0.6; margin-top: 2px; }
-    .result-banner { padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; display: none; }
-    .result-banner.show { display: block; }
-    .result-banner.match { background: #dcfce7; border: 1px solid #86efac; }
-    .result-banner.nomatch { background: #fef9c3; border: 1px solid #fde047; }
-    .result-banner p { font-size: 14px; font-weight: 500; }
-    .result-banner span { font-size: 13px; color: #555; }
-    .step-hint { font-size: 13px; color: #aaa; text-align: center; padding: 1rem; }
-    footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futuru — Mix Tester</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+nav .back:hover { color: white; }
+.container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+.card { background: white; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid #e5e5e5; }
+.card-title { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 1.2rem; }
+.btn-grid { display: grid; gap: 12px; }
+.btn-grid.cols2 { grid-template-columns: 1fr 1fr; }
+.sel-btn { padding: 1rem 1.2rem; border-radius: 10px; border: 2px solid #e5e5e5; background: white; cursor: pointer; text-align: left; transition: all 0.15s; }
+.sel-btn:hover { border-color: #aaa; }
+.sel-btn.active { border-color: #1a1a1a; background: #1a1a1a; color: white; }
+.sel-btn.active-blue { border-color: #0369a1; background: #0369a1; color: white; }
+.sel-btn .btn-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; }
+.sel-btn .btn-sub { font-size: 12px; opacity: 0.7; }
+.sel-btn .btn-std { font-size: 11px; opacity: 0.6; margin-top: 6px; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.5rem; }
+.metric { background: white; border-radius: 12px; padding: 1.2rem; border: 1px solid #e5e5e5; text-align: center; }
+.metric .num { font-size: 1.8rem; font-weight: 600; }
+.metric .lbl { font-size: 12px; color: #888; margin-top: 4px; }
+.metric.good .num { color: #3a7d44; }
+.metric.info .num { color: #0369a1; }
+.input-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; justify-content: center; }
+.input-row label { font-size: 13px; color: #555; width: 160px; flex-shrink: 0; }
+.input-row .unit { font-size: 13px; color: #888; min-width: 35px; }
+.num-input { width: 110px; padding: 8px 12px; border: 1.5px solid #e5e5e5; border-radius: 8px; font-size: 14px; font-weight: 500; color: #1a1a1a; background: #fafafa; transition: border-color 0.15s, background 0.15s; -moz-appearance: textfield; }
+.num-input::-webkit-outer-spin-button, .num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num-input:focus { outline: none; border-color: #1a1a1a; background: white; }
+.num-input.error { border-color: #ef4444; background: #fef2f2; }
+.mix-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 8px; }
+.mix-item { padding: 10px 12px; border-radius: 8px; border: 1px solid #e5e5e5; background: #fafafa; }
+.mix-item.active { background: #1a1a1a; border-color: #1a1a1a; color: white; }
+.mix-item.active-blue { background: #0369a1; border-color: #0369a1; color: white; }
+.mix-item .mix-strength { font-size: 14px; font-weight: 600; }
+.mix-item .mix-exposure { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+.mix-item .mix-use { font-size: 10px; opacity: 0.6; margin-top: 2px; }
+.result-banner { padding: 1rem 1.5rem; border-radius: 10px; margin-bottom: 1.5rem; display: none; }
+.result-banner.show { display: block; }
+.result-banner.match { background: #dcfce7; border: 1px solid #86efac; }
+.result-banner.nomatch { background: #fef9c3; border: 1px solid #fde047; }
+.result-banner p { font-size: 14px; font-weight: 500; }
+.result-banner span { font-size: 13px; color: #555; }
+.step-hint { font-size: 13px; color: #aaa; text-align: center; padding: 1rem; }
+footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+.save-row { display: flex; justify-content: center; margin-bottom: 1.5rem; }
+.btn-save { background: #0f3460; color: white; border: none; border-radius: 10px; padding: 0.8rem 2rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: background 0.2s; display: none; }
+.btn-save.visible { display: inline-flex; align-items: center; gap: 0.5rem; }
+.btn-save:hover { background: #1a4a8a; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: none; align-items: center; justify-content: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: white; border-radius: 16px; padding: 2rem; width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.modal h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+.modal p { font-size: 0.85rem; color: #888; margin-bottom: 1.2rem; }
+.modal select { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; margin-bottom: 1rem; background: #fafaf8; outline: none; font-family: system-ui, sans-serif; }
+.modal select:focus { border-color: #0f3460; }
+.modal-label { font-size: 0.8rem; color: #666; margin-bottom: 0.4rem; display: block; }
+.modal input { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; margin-bottom: 1.2rem; background: #fafaf8; outline: none; font-family: system-ui, sans-serif; }
+.modal input:focus { border-color: #0f3460; }
+.modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.btn-modal-cancel { background: transparent; border: 1.5px solid #ddd; border-radius: 8px; padding: 0.6rem 1.2rem; font-size: 0.9rem; cursor: pointer; }
+.btn-modal-save { background: #0f3460; color: white; border: none; border-radius: 8px; padding: 0.6rem 1.4rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.btn-modal-save:hover { background: #1a4a8a; }
+.modal-no-projects { font-size: 0.85rem; color: #e05a00; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; }
+.modal-no-projects a { color: #0f3460; font-weight: 600; }
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: #1a1a2e; color: white; padding: 0.9rem 1.4rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.25); transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 300; }
+.toast.show { transform: translateY(0); opacity: 1; }
+</style>
 </head>
 <body>
-
 <nav>
-  <a href="index.html" class="logo">Futuru</a>
-  <a href="index.html" class="back">← Back to home</a>
+<a href="index.html" class="logo">Futuru</a>
+<a href="index.html" class="back">← Back to home</a>
 </nav>
-
 <div class="container">
-
-  <!-- Step 1: Plant -->
-  <div class="card">
-    <p class="card-title">Step 1 — Which plant is the concrete from?</p>
-    <div class="btn-grid cols2">
-      <button class="sel-btn" id="btn-reykjavik" onclick="setPlant('reykjavik')">
-        <div class="btn-title">Reykjavík</div>
-        <div class="btn-sub">Breiðhöfða 3, 110 Reykjavík</div>
-        <div class="btn-std">ÍST EN 206:2013+A1:2016 · Valid to Jan 2027</div>
-      </button>
-      <button class="sel-btn" id="btn-akranes" onclick="setPlant('akranes')">
-        <div class="btn-title">Akranes</div>
-        <div class="btn-sub">Höfðasel 4, 300 Akranes</div>
-        <div class="btn-std">ÍST EN 206:2013+A2:2021 · Valid to Feb 2026</div>
-      </button>
-    </div>
-  </div>
-
-  <!-- Step 2: Location -->
-  <div class="card" id="step2-card" style="opacity:0.4; pointer-events:none;">
-    <p class="card-title">Step 2 — Where will this concrete be used?</p>
-    <div class="btn-grid cols2">
-      <button class="sel-btn" id="btn-indoor" onclick="setLocation('indoor')">
-        <div class="btn-title">Indoors</div>
-        <div class="btn-sub">Protected from weather</div>
-        <div class="btn-std">C35/45 · C50/60</div>
-      </button>
-      <button class="sel-btn" id="btn-outdoor" onclick="setLocation('outdoor')">
-        <div class="btn-title">Outdoors</div>
-        <div class="btn-sub">Exposed to weather & frost</div>
-        <div class="btn-std">C25/30 · C30/37 · C35/45 · C40/50</div>
-      </button>
-    </div>
-  </div>
-
-  <!-- Result banner -->
-  <div class="result-banner" id="result-banner">
-    <p id="banner-title"></p>
-    <span id="banner-sub"></span>
-  </div>
-
-  <!-- Metrics -->
-  <div class="metrics">
-    <div class="metric good"><div class="num" id="mpa-out">—</div><div class="lbl">Predicted strength (MPa)</div></div>
-    <div class="metric info"><div class="num" id="class-out">—</div><div class="lbl">Strength class</div></div>
-    <div class="metric"><div class="num" id="wc-out">—</div><div class="lbl">Water / cement ratio</div></div>
-  </div>
-
-  <!-- Step 3: Number inputs -->
-  <div class="card" id="step3-card" style="opacity:0.4; pointer-events:none; text-align:center;">
-    <p class="card-title">Step 3 — Enter your mix ingredients (kg/m³)</p>
-
-    <div class="input-row">
-      <label>Cement</label>
-      <input type="number" class="num-input" id="cement" value="350" min="1" max="10000" step="1">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Water</label>
-      <input type="number" class="num-input" id="water" value="175" min="1" max="10000" step="1">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Fine aggregate</label>
-      <input type="number" class="num-input" id="fine" value="750" min="1" max="10000" step="1">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Coarse aggregate</label>
-      <input type="number" class="num-input" id="coarse" value="950" min="1" max="10000" step="1">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Fly ash</label>
-      <input type="number" class="num-input" id="flyash" value="50" min="1" max="10000" step="1">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Superplasticizer</label>
-      <input type="number" class="num-input" id="sp" value="5" min="1" max="10000" step="0.5">
-      <span class="unit">kg</span>
-      
-    </div>
-    <div class="input-row">
-      <label>Curing age</label>
-      <input type="number" class="num-input" id="age" value="28" min="1" max="10000" step="1">
-      <span class="unit">days</span>
-      
-    </div>
-  </div>
-
-  <!-- Chart -->
-  <div class="card">
-    <p class="card-title">Strength vs. water/cement ratio</p>
-    <div style="position:relative;height:240px;">
-      <canvas id="chart"></canvas>
-    </div>
-  </div>
-
-  <!-- Certified mixes -->
-  <div class="card">
-    <p class="card-title" id="mix-title">BM Vallá certified mixes</p>
-    <div class="mix-grid" id="mix-grid">
-      <p class="step-hint">Select a plant and location above to see certified mixes.</p>
-    </div>
-  </div>
-
+<div class="card">
+<p class="card-title">Step 1 — Which plant is the concrete from?</p>
+<div class="btn-grid cols2">
+<button class="sel-btn" id="btn-reykjavik" onclick="setPlant('reykjavik')">
+<div class="btn-title">Reykjavík</div>
+<div class="btn-sub">Breiðhöfða 3, 110 Reykjavík</div>
+<div class="btn-std">ÍST EN 206:2013+A1:2016 · Valid to Jan 2027</div>
+</button>
+<button class="sel-btn" id="btn-akranes" onclick="setPlant('akranes')">
+<div class="btn-title">Akranes</div>
+<div class="btn-sub">Höfðasel 4, 300 Akranes</div>
+<div class="btn-std">ÍST EN 206:2013+A2:2021 · Valid to Feb 2026</div>
+</button>
 </div>
-
+</div>
+<div class="card" id="step2-card" style="opacity:0.4; pointer-events:none;">
+<p class="card-title">Step 2 — Where will this concrete be used?</p>
+<div class="btn-grid cols2">
+<button class="sel-btn" id="btn-indoor" onclick="setLocation('indoor')">
+<div class="btn-title">Indoors</div>
+<div class="btn-sub">Protected from weather</div>
+<div class="btn-std">C35/45 · C50/60</div>
+</button>
+<button class="sel-btn" id="btn-outdoor" onclick="setLocation('outdoor')">
+<div class="btn-title">Outdoors</div>
+<div class="btn-sub">Exposed to weather & frost</div>
+<div class="btn-std">C25/30 · C30/37 · C35/45 · C40/50</div>
+</button>
+</div>
+</div>
+<div class="result-banner" id="result-banner">
+<p id="banner-title"></p>
+<span id="banner-sub"></span>
+</div>
+<div class="metrics">
+<div class="metric good"><div class="num" id="mpa-out">—</div><div class="lbl">Predicted strength (MPa)</div></div>
+<div class="metric info"><div class="num" id="class-out">—</div><div class="lbl">Strength class</div></div>
+<div class="metric"><div class="num" id="wc-out">—</div><div class="lbl">Water / cement ratio</div></div>
+</div>
+<div class="card" id="step3-card" style="opacity:0.4; pointer-events:none; text-align:center;">
+<p class="card-title">Step 3 — Enter your mix ingredients (kg/m³)</p>
+<div class="input-row"><label>Cement</label><input type="number" class="num-input" id="cement" value="350" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+<div class="input-row"><label>Water</label><input type="number" class="num-input" id="water" value="175" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+<div class="input-row"><label>Fine aggregate</label><input type="number" class="num-input" id="fine" value="750" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+<div class="input-row"><label>Coarse aggregate</label><input type="number" class="num-input" id="coarse" value="950" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+<div class="input-row"><label>Fly ash</label><input type="number" class="num-input" id="flyash" value="50" min="1" max="10000" step="1"><span class="unit">kg</span></div>
+<div class="input-row"><label>Superplasticizer</label><input type="number" class="num-input" id="sp" value="5" min="1" max="10000" step="0.5"><span class="unit">kg</span></div>
+<div class="input-row"><label>Curing age</label><input type="number" class="num-input" id="age" value="28" min="1" max="10000" step="1"><span class="unit">days</span></div>
+</div>
+<div class="save-row">
+<button class="btn-save" id="btn-save" onclick="openSaveModal()">💾 Save to Project</button>
+</div>
+<div class="card">
+<p class="card-title">Strength vs. water/cement ratio</p>
+<div style="position:relative;height:240px;"><canvas id="chart"></canvas></div>
+</div>
+<div class="card">
+<p class="card-title" id="mix-title">BM Vallá certified mixes</p>
+<div class="mix-grid" id="mix-grid">
+<p class="step-hint">Select a plant and location above to see certified mixes.</p>
+</div>
+</div>
+</div>
 <footer>Futuru © 2026 — Built on BOxCrete open source</footer>
-
+<div class="modal-overlay" id="modal-overlay">
+<div class="modal">
+<h2>Save Mix to Project</h2>
+<p>Choose a project and give this mix a name.</p>
+<div id="modal-no-projects" class="modal-no-projects" style="display:none;">
+      No projects yet. <a href="history.html">Create one in Projects →</a>
+</div>
+<label class="modal-label">Project</label>
+<select id="modal-project-select"></select>
+<label class="modal-label">Mix name (optional)</label>
+<input type="text" id="modal-mix-name" placeholder="e.g. Pile caps – test 3" maxlength="80" />
+<div class="modal-actions">
+<button class="btn-modal-cancel" onclick="closeModal()">Cancel</button>
+<button class="btn-modal-save" onclick="confirmSave()">Save</button>
+</div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
 <script>
 const MIXES = {
   indoor: [
@@ -207,140 +177,159 @@ const MIXES = {
     { strength: 'C40/50', exposure: 'XF4', use: 'Severe frost, heavy duty' }
   ]
 };
-
-const STANDARDS = {
-  reykjavik: 'ÍST EN 206:2013+A1:2016',
-  akranes: 'ÍST EN 206:2013+A2:2021'
-};
-
-const MIN_MPA = {
-  'C25/30': 25, 'C30/37': 30, 'C35/45': 35, 'C40/50': 40, 'C50/60': 50
-};
-
-let currentPlant = null;
-let currentLocation = null;
+const STANDARDS = { reykjavik: 'ÍST EN 206:2013+A1:2016', akranes: 'ÍST EN 206:2013+A2:2021' };
+const MIN_MPA = { 'C25/30': 25, 'C30/37': 30, 'C35/45': 35, 'C40/50': 40, 'C50/60': 50 };
+let currentPlant = null, currentLocation = null, lastMpa = null, lastMatch = null;
 
 function setPlant(plant) {
   currentPlant = plant;
-  document.getElementById('btn-reykjavik').className = 'sel-btn' + (plant === 'reykjavik' ? ' active' : '');
-  document.getElementById('btn-akranes').className = 'sel-btn' + (plant === 'akranes' ? ' active' : '');
+  document.getElementById('btn-reykjavik').className = 'sel-btn' + (plant==='reykjavik'?' active':'');
+  document.getElementById('btn-akranes').className = 'sel-btn' + (plant==='akranes'?' active':'');
   document.getElementById('step2-card').style.opacity = '1';
   document.getElementById('step2-card').style.pointerEvents = 'auto';
   update();
 }
-
 function setLocation(loc) {
   currentLocation = loc;
-  document.getElementById('btn-indoor').className = 'sel-btn' + (loc === 'indoor' ? ' active' : '');
-  document.getElementById('btn-outdoor').className = 'sel-btn' + (loc === 'outdoor' ? ' active-blue' : '');
+  document.getElementById('btn-indoor').className = 'sel-btn' + (loc==='indoor'?' active':'');
+  document.getElementById('btn-outdoor').className = 'sel-btn' + (loc==='outdoor'?' active-blue':'');
   document.getElementById('step3-card').style.opacity = '1';
   document.getElementById('step3-card').style.pointerEvents = 'auto';
   update();
 }
-
 function predict(cement, water, fine, coarse, flyash, sp, age) {
-  const wc = water / (cement + 0.5 * flyash + 1e-6);
-  const binder = cement + 0.8 * flyash;
-  const s = 0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0;
-  return Math.max(s, 0);
+  const wc = water / (cement + 0.5*flyash + 1e-6);
+  const binder = cement + 0.8*flyash;
+  return Math.max(0.35*binder - 25.0*wc + 0.008*fine*0.1 + 0.005*coarse*0.1 + 2.5*sp + 0.18*age - 10.0, 0);
 }
-
 function getBestMatch(mpa, loc) {
   if (!loc) return null;
   let match = null;
-  for (const m of MIXES[loc]) {
-    if (mpa >= (MIN_MPA[m.strength] || 0)) match = m;
-  }
+  for (const m of MIXES[loc]) { if (mpa >= (MIN_MPA[m.strength]||0)) match = m; }
   return match;
 }
-
 const ids = ['cement','water','fine','coarse','flyash','sp','age'];
 const wcRatios = [];
-for (let r = 0.25; r <= 1.4; r += 0.05) wcRatios.push(Math.round(r*100)/100);
-
+for (let r=0.25; r<=1.4; r+=0.05) wcRatios.push(Math.round(r*100)/100);
 const chart = new Chart(document.getElementById('chart'), {
   type: 'line',
-  data: {
-    labels: wcRatios,
-    datasets: [
-      { data: [], borderColor: '#1a1a1a', backgroundColor: 'rgba(0,0,0,0.05)', borderWidth: 2, pointRadius: 0, fill: true, tension: 0.4 },
-      { data: [], borderColor: '#3a7d44', backgroundColor: '#3a7d44', pointRadius: 7, showLine: false }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { title: { display: true, text: 'Water / cement ratio' } },
-      y: { title: { display: true, text: 'MPa' }, min: 0 }
-    }
-  }
+  data: { labels: wcRatios, datasets: [
+    { data:[], borderColor:'#1a1a1a', backgroundColor:'rgba(0,0,0,0.05)', borderWidth:2, pointRadius:0, fill:true, tension:0.4 },
+    { data:[], borderColor:'#3a7d44', backgroundColor:'#3a7d44', pointRadius:7, showLine:false }
+  ]},
+  options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+    scales: { x:{title:{display:true,text:'Water / cement ratio'}}, y:{title:{display:true,text:'MPa'},min:0} }}
 });
-
 function getVal(id) {
   const el = document.getElementById(id);
   const val = parseFloat(el.value);
-  const min = parseFloat(el.min);
-  const max = parseFloat(el.max);
-  if (isNaN(val) || val <= 0) {
-    el.classList.add('error');
-    return null;
-  }
-  el.classList.remove('error');
-  return val;
+  if (isNaN(val)||val<=0) { el.classList.add('error'); return null; }
+  el.classList.remove('error'); return val;
 }
-
 function update() {
-  const vals = ids.map(id => getVal(id));
-  if (vals.some(v => v === null)) return;
-  const [cement, water, fine, coarse, flyash, sp, age] = vals;
-
-  const mpa = predict(cement, water, fine, coarse, flyash, sp, age);
-  const wc = water / cement;
+  const vals = ids.map(id=>getVal(id));
+  if (vals.some(v=>v===null)) return;
+  const [cement,water,fine,coarse,flyash,sp,age] = vals;
+  const mpa = predict(cement,water,fine,coarse,flyash,sp,age);
+  const wc = water/cement;
+  lastMpa = mpa;
   document.getElementById('mpa-out').textContent = mpa.toFixed(1);
   document.getElementById('wc-out').textContent = wc.toFixed(2);
-
   const match = getBestMatch(mpa, currentLocation);
+  lastMatch = match;
   document.getElementById('class-out').textContent = match ? match.strength : '—';
-
-  if (currentPlant) {
-    document.getElementById('mix-title').textContent = 'BM Vallá certified mixes — ' + STANDARDS[currentPlant];
-  }
-
+  if (currentPlant) document.getElementById('mix-title').textContent = 'BM Vallá certified mixes — '+STANDARDS[currentPlant];
   const banner = document.getElementById('result-banner');
   if (currentLocation && match) {
     banner.className = 'result-banner show match';
-    document.getElementById('banner-title').textContent = '✓ Mix matches ' + match.strength + ' — ' + match.exposure;
-    document.getElementById('banner-sub').textContent = match.use + ' · ' + (currentLocation === 'indoor' ? 'Indoor use' : 'Outdoor use');
+    document.getElementById('banner-title').textContent = '✓ Mix matches '+match.strength+' — '+match.exposure;
+    document.getElementById('banner-sub').textContent = match.use+' · '+(currentLocation==='indoor'?'Indoor use':'Outdoor use');
   } else if (currentLocation && !match) {
     banner.className = 'result-banner show nomatch';
     document.getElementById('banner-title').textContent = '⚠ Mix does not meet minimum certified strength';
     document.getElementById('banner-sub').textContent = 'Adjust your ingredients to reach the required MPa';
-  } else {
-    banner.className = 'result-banner';
-  }
-
-  chart.data.datasets[0].data = wcRatios.map(r => predict(cement, r*cement, fine, coarse, flyash, sp, age).toFixed(1));
-  chart.data.datasets[1].data = wcRatios.map(r => Math.abs(r - wc) < 0.025 ? mpa.toFixed(1) : null);
+  } else { banner.className = 'result-banner'; }
+  if (currentPlant && currentLocation) document.getElementById('btn-save').classList.add('visible');
+  chart.data.datasets[0].data = wcRatios.map(r=>predict(cement,r*cement,fine,coarse,flyash,sp,age).toFixed(1));
+  chart.data.datasets[1].data = wcRatios.map(r=>Math.abs(r-wc)<0.025?mpa.toFixed(1):null);
   chart.update('none');
-
   const grid = document.getElementById('mix-grid');
   grid.innerHTML = '';
-  if (!currentLocation) {
-    grid.innerHTML = '<p style="font-size:13px;color:#aaa;padding:0.5rem;">Select a plant and location above to see certified mixes.</p>';
-    return;
-  }
+  if (!currentLocation) { grid.innerHTML='<p style="font-size:13px;color:#aaa;padding:0.5rem;">Select a plant and location above to see certified mixes.</p>'; return; }
   MIXES[currentLocation].forEach(m => {
-    const isMatch = mpa >= (MIN_MPA[m.strength] || 0);
+    const isMatch = mpa >= (MIN_MPA[m.strength]||0);
     const div = document.createElement('div');
-    div.className = 'mix-item' + (isMatch ? (currentLocation === 'outdoor' ? ' active-blue' : ' active') : '');
-    div.innerHTML = '<div class="mix-strength">' + m.strength + '</div><div class="mix-exposure">' + m.exposure + '</div><div class="mix-use">' + m.use + '</div>';
+    div.className = 'mix-item'+(isMatch?(currentLocation==='outdoor'?' active-blue':' active'):'');
+    div.innerHTML = '<div class="mix-strength">'+m.strength+'</div><div class="mix-exposure">'+m.exposure+'</div><div class="mix-use">'+m.use+'</div>';
     grid.appendChild(div);
   });
 }
-
-ids.forEach(id => document.getElementById(id).addEventListener('input', update));
+ids.forEach(id=>document.getElementById(id).addEventListener('input',update));
 update();
+
+// ── localStorage helpers ──────────────────────────────────────────
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem('futuru-projects');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveProjects(projects) {
+  localStorage.setItem('futuru-projects', JSON.stringify(projects));
+}
+
+// ── Save modal ────────────────────────────────────────────────────
+function openSaveModal() {
+  const projects = loadProjects();
+  const select = document.getElementById('modal-project-select');
+  const noProj = document.getElementById('modal-no-projects');
+  select.innerHTML = '';
+  if (!projects.length) {
+    noProj.style.display = 'block';
+    select.style.display = 'none';
+  } else {
+    noProj.style.display = 'none';
+    select.style.display = 'block';
+    projects.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id;
+      o.textContent = p.name;
+      select.appendChild(o);
+    });
+  }
+  document.getElementById('modal-mix-name').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function confirmSave() {
+  const projects = loadProjects();
+  if (!projects.length) { closeModal(); return; }
+  const projectId = document.getElementById('modal-project-select').value;
+  const mixName = document.getElementById('modal-mix-name').value.trim();
+  const proj = projects.find(p => p.id === projectId);
+  if (!proj) return;
+  const vals = ids.map(id => parseFloat(document.getElementById(id).value));
+  const [cement,water,fine,coarse,flyash,sp,age] = vals;
+  proj.mixes.push({
+    name: mixName || (lastMatch ? lastMatch.strength+' mix' : 'Untitled mix'),
+    grade: lastMatch ? lastMatch.strength : '—',
+    strength: lastMpa ? lastMpa.toFixed(1) : '—',
+    details: `cement ${cement} · water ${water} · w/c ${(water/cement).toFixed(2)} · age ${age}d`,
+    plant: currentPlant,
+    location: currentLocation,
+    savedAt: new Date().toISOString()
+  });
+  saveProjects(projects);
+  closeModal();
+  showToast('✓ Mix saved to "' + proj.name + '"');
+}
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if(e.target===this) closeModal(); });
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Futuru — Projects</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: system-ui, sans-serif; background: #f5f5f0; color: #1a1a1a; }
+nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; background: #1a1a1a; }
+nav .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+nav .back { color: #aaa; font-size: 14px; text-decoration: none; }
+nav .back:hover { color: white; }
+.hero { background: #1a1a1a; color: white; padding: 2.5rem 2rem 2rem; }
+.hero h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 0.4rem; }
+.hero p { font-size: 0.9rem; color: #aaa; }
+.stats-strip { display: flex; gap: 2rem; margin-top: 1.5rem; }
+.stat .num { font-size: 1.5rem; font-weight: 700; }
+.stat .lbl { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+.container { max-width: 860px; margin: 2rem auto; padding: 0 1.5rem; }
+.new-project-row { display: flex; gap: 10px; margin-bottom: 2rem; }
+.new-project-input { flex: 1; padding: 0.75rem 1rem; border: 1.5px solid #e0e0e0; border-radius: 10px; font-size: 0.95rem; background: white; outline: none; font-family: system-ui, sans-serif; }
+.new-project-input:focus { border-color: #1a1a1a; }
+.btn-new { background: #1a1a1a; color: white; border: none; border-radius: 10px; padding: 0.75rem 1.3rem; font-size: 0.9rem; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.btn-new:hover { background: #333; }
+.project-card { background: white; border-radius: 12px; border: 1px solid #e5e5e5; margin-bottom: 1rem; overflow: hidden; }
+.project-header { display: flex; align-items: center; justify-content: space-between; padding: 1.1rem 1.3rem; cursor: pointer; user-select: none; }
+.project-header:hover { background: #fafafa; }
+.project-left { display: flex; align-items: center; gap: 0.9rem; }
+.project-icon { width: 36px; height: 36px; border-radius: 8px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: white; flex-shrink: 0; }
+.project-name { font-size: 0.95rem; font-weight: 600; }
+.project-meta { font-size: 12px; color: #888; margin-top: 2px; }
+.project-right { display: flex; align-items: center; gap: 1rem; }
+.project-count { font-size: 12px; color: #888; }
+.project-chevron { font-size: 12px; color: #bbb; transition: transform 0.2s; }
+.project-card.open .project-chevron { transform: rotate(180deg); }
+.project-body { display: none; border-top: 1px solid #f0f0f0; }
+.project-card.open .project-body { display: block; }
+.mix-row { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 1.3rem; border-bottom: 1px solid #f5f5f5; }
+.mix-row:last-child { border-bottom: none; }
+.mix-row:hover { background: #fafafa; }
+.mix-info { flex: 1; }
+.mix-name { font-size: 13px; font-weight: 600; }
+.mix-details { font-size: 11px; color: #888; margin-top: 2px; }
+.mix-strength-badge { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; margin-left: 1rem; }
+.badge-mpa { font-size: 1rem; font-weight: 700; color: #3a7d44; }
+.badge-grade { font-size: 11px; color: #0369a1; font-weight: 600; background: #e0f2fe; padding: 2px 6px; border-radius: 4px; }
+.badge-date { font-size: 10px; color: #bbb; }
+.btn-delete-mix { background: none; border: none; cursor: pointer; color: #ddd; font-size: 14px; padding: 4px 6px; border-radius: 6px; margin-left: 0.5rem; }
+.btn-delete-mix:hover { color: #ef4444; background: #fef2f2; }
+.project-actions { display: flex; gap: 0.5rem; }
+.btn-delete-project { background: none; border: 1px solid #eee; border-radius: 7px; cursor: pointer; color: #ccc; font-size: 11px; padding: 4px 10px; }
+.btn-delete-project:hover { color: #ef4444; border-color: #fca5a5; background: #fef2f2; }
+.empty-state { text-align: center; padding: 4rem 2rem; }
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+.empty-state h2 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.empty-state p { font-size: 0.9rem; color: #888; }
+.empty-mixes { padding: 1.2rem 1.3rem; font-size: 13px; color: #bbb; font-style: italic; }
+footer { text-align: center; padding: 2rem; font-size: 12px; color: #aaa; }
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: #1a1a2e; color: white; padding: 0.9rem 1.4rem; border-radius: 10px; font-size: 0.9rem; font-weight: 500; box-shadow: 0 4px 20px rgba(0,0,0,0.25); transform: translateY(80px); opacity: 0; transition: all 0.3s; z-index: 300; }
+.toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+<nav>
+<a href="index.html" class="logo">Futuru</a>
+<a href="index.html" class="back">← Back to home</a>
+</nav>
+<div class="hero">
+<h1>Projects</h1>
+<p>Saved mixes organised by project</p>
+<div class="stats-strip">
+<div class="stat"><div class="num" id="stat-projects">0</div><div class="lbl">Projects</div></div>
+<div class="stat"><div class="num" id="stat-mixes">0</div><div class="lbl">Saved mixes</div></div>
+<div class="stat"><div class="num" id="stat-last">—</div><div class="lbl">Last saved</div></div>
+</div>
+</div>
+<div class="container">
+<div class="new-project-row">
+<input type="text" class="new-project-input" id="new-project-input" placeholder="New project name…" maxlength="80" />
+<button class="btn-new" onclick="createProject()">+ New Project</button>
+</div>
+<div id="projects-list"></div>
+</div>
+<footer>Futuru © 2026 — Built on BOxCrete open source</footer>
+<div class="toast" id="toast"></div>
+<script>
+// ── localStorage helpers ──────────────────────────────────────────
+function loadProjects() {
+  try {
+    const raw = localStorage.getItem('futuru-projects');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+function saveProjects(projects) {
+  localStorage.setItem('futuru-projects', JSON.stringify(projects));
+}
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// ── Render ────────────────────────────────────────────────────────
+function render() {
+  const projects = loadProjects();
+  // stats
+  const totalMixes = projects.reduce((s, p) => s + (p.mixes ? p.mixes.length : 0), 0);
+  document.getElementById('stat-projects').textContent = projects.length;
+  document.getElementById('stat-mixes').textContent = totalMixes;
+  // last saved date
+  let latest = null;
+  projects.forEach(p => (p.mixes||[]).forEach(m => {
+    if (!latest || m.savedAt > latest) latest = m.savedAt;
+  }));
+  document.getElementById('stat-last').textContent = latest
+    ? new Date(latest).toLocaleDateString('en-GB', { day:'numeric', month:'short' })
+    : '—';
+
+  const list = document.getElementById('projects-list');
+  if (!projects.length) {
+    list.innerHTML = `<div class="empty-state">
+      <div class="icon">📁</div>
+      <h2>No projects yet</h2>
+      <p>Type a name above and click "+ New Project" to get started.</p>
+    </div>`;
+    return;
+  }
+  list.innerHTML = '';
+  projects.forEach((proj, pi) => {
+    const mixes = proj.mixes || [];
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.id = 'proj-' + proj.id;
+    const mixCount = mixes.length;
+    const lastDate = mixCount
+      ? new Date(mixes[mixes.length-1].savedAt).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+      : null;
+    card.innerHTML = `
+      <div class="project-header" onclick="toggleProject('${proj.id}')">
+        <div class="project-left">
+          <div class="project-icon">📁</div>
+          <div>
+            <div class="project-name">${escHtml(proj.name)}</div>
+            <div class="project-meta">${lastDate ? 'Last mix: '+lastDate : 'No mixes yet'}</div>
+          </div>
+        </div>
+        <div class="project-right">
+          <span class="project-count">${mixCount} mix${mixCount!==1?'es':''}</span>
+          <div class="project-actions">
+            <button class="btn-delete-project" onclick="deleteProject(event,'${proj.id}')">Delete</button>
+          </div>
+          <span class="project-chevron">▼</span>
+        </div>
+      </div>
+      <div class="project-body">
+        ${mixCount === 0
+          ? '<div class="empty-mixes">No mixes saved to this project yet.</div>'
+          : mixes.map((m, mi) => `
+          <div class="mix-row">
+            <div class="mix-info">
+              <div class="mix-name">${escHtml(m.name)}</div>
+              <div class="mix-details">${escHtml(m.details||'')} · ${m.plant||''}${m.location ? ' · '+m.location : ''}</div>
+            </div>
+            <div class="mix-strength-badge">
+              <span class="badge-mpa">${m.strength} MPa</span>
+              <span class="badge-grade">${m.grade}</span>
+              <span class="badge-date">${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+            </div>
+            <button class="btn-delete-mix" title="Delete mix" onclick="deleteMix(event,'${proj.id}',${mi})">✕</button>
+          </div>`).join('')
+        }
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toggleProject(id) {
+  const card = document.getElementById('proj-' + id);
+  if (card) card.classList.toggle('open');
+}
+
+// ── Actions ───────────────────────────────────────────────────────
+function createProject() {
+  const input = document.getElementById('new-project-input');
+  const name = input.value.trim();
+  if (!name) { input.focus(); return; }
+  const projects = loadProjects();
+  if (projects.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+    showToast('A project with that name already exists.');
+    return;
+  }
+  projects.push({ id: uid(), name, mixes: [], createdAt: new Date().toISOString() });
+  saveProjects(projects);
+  input.value = '';
+  render();
+  showToast('✓ Project "' + name + '" created');
+}
+function deleteProject(e, id) {
+  e.stopPropagation();
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === id);
+  if (!proj) return;
+  if (!confirm(`Delete project "${proj.name}" and all its mixes?`)) return;
+  saveProjects(projects.filter(p => p.id !== id));
+  render();
+  showToast('Project deleted.');
+}
+function deleteMix(e, projectId, mixIndex) {
+  e.stopPropagation();
+  const projects = loadProjects();
+  const proj = projects.find(p => p.id === projectId);
+  if (!proj) return;
+  proj.mixes.splice(mixIndex, 1);
+  saveProjects(projects);
+  render();
+  // re-open the card
+  setTimeout(() => {
+    const card = document.getElementById('proj-' + projectId);
+    if (card) card.classList.add('open');
+  }, 10);
+  showToast('Mix removed.');
+}
+
+// Enter key on new project input
+document.getElementById('new-project-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') createProject();
+});
+
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+render();
+</script>
+</body>
+</html>
