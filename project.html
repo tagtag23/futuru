@@ -100,6 +100,34 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .toast.show { transform: translateY(0); opacity: 1; }
 
 footer { text-align: center; padding: 2rem; font-size: 12px; color: #444; border-top: 1px solid #2a2a2a; margin-top: 2rem; }
+
+/* ── PRINT / PDF STYLES ── */
+@media print {
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { background: #fff !important; color: #1a1a1a !important; font-family: system-ui, sans-serif; }
+  nav, .tabs, .header-sub, .result-actions, footer, .btn-run, .btn-del-mix { display: none !important; }
+  .header { padding: 0 0 1rem 0; }
+  .header h1 { color: #1a1a1a !important; font-size: 1.4rem; }
+  .content { padding: 0; }
+  .panel { display: block !important; }
+  .two-col { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .card { background: #f9f9f9 !important; border: 1px solid #ddd !important; border-radius: 6px; padding: 1rem; margin-bottom: 0.8rem; break-inside: avoid; }
+  .section-title { color: #888 !important; }
+  .field label { color: #888 !important; }
+  .field input { background: #fff !important; border: 1px solid #ddd !important; color: #1a1a1a !important; }
+  .goals { display: none !important; }
+  .target-row { display: none !important; }
+  .result-empty { display: none !important; }
+  .metric { background: #f0f0f0 !important; border: 1px solid #ddd !important; }
+  .metric-val { color: #1a1a1a !important; }
+  .metric-val.green { color: #16a34a !important; }
+  .compare td, .compare th { color: #1a1a1a !important; border-color: #ddd !important; }
+  .compare .neg { color: #16a34a !important; }
+  .compare .pos { color: #dc2626 !important; }
+  #panel-mixes, #panel-reports { display: none !important; }
+  .print-header { display: block !important; }
+}
+.print-header { display: none; }
 </style>
 </head>
 <body>
@@ -112,6 +140,21 @@ footer { text-align: center; padding: 2rem; font-size: 12px; color: #444; border
     <strong id="nav-name">—</strong>
   </div>
 </nav>
+
+<!-- Print-only header -->
+<div class="print-header" style="padding:1.5rem 2rem 0;max-width:960px;margin:0 auto;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1a1a;padding-bottom:1rem;margin-bottom:1.5rem;">
+    <div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:4px;">Futuru — Optimization Report</div>
+      <div style="font-size:1.4rem;font-weight:700;letter-spacing:-0.02em;" id="print-title">—</div>
+      <div style="font-size:12px;color:#888;margin-top:4px;" id="print-date">—</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#888;margin-bottom:4px;">Goal</div>
+      <div style="font-size:13px;font-weight:600;" id="print-goal">—</div>
+    </div>
+  </div>
+</div>
 
 <div class="header">
   <h1 id="proj-title">—</h1>
@@ -204,6 +247,7 @@ function getProj() { return load().find(p => p.id === projectId) || null; }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// Init
 (function() {
   const params = new URLSearchParams(window.location.search);
   projectId = params.get('id');
@@ -237,6 +281,7 @@ function setGoal(el) {
   goal = el.dataset.goal;
 }
 
+// Model helpers
 function v(id, def) { return parseFloat(document.getElementById(id).value) || def; }
 function getMix() {
   return { cement:v('i-cement',320), water:v('i-water',165), flyash:v('i-flyash',50), slag:v('i-slag',80), sand:v('i-sand',780), gravel:v('i-gravel',1020), admixture:v('i-admixture',4), age:v('i-age',28) };
@@ -254,23 +299,27 @@ function grade(mpa) {
   if(mpa>=25)return'C20/25'; return'C16/20';
 }
 function jitter(val, range) { return Math.max(0, val + (Math.random()-0.5)*2*range); }
+
 function makeCandidate(base) {
-  if(goal==='cheapest')         return {cement:jitter(base.cement*0.88,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.2,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.1,1),age:base.age};
-  if(goal==='lowest_co2')       return {cement:jitter(base.cement*0.78,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.5,25),slag:jitter(base.slag*1.4,25),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.2,1),age:base.age};
-  if(goal==='highest_strength') return {cement:jitter(base.cement*1.1,30),water:jitter(base.water*0.88,12),flyash:jitter(base.flyash,15),slag:jitter(base.slag,15),sand:jitter(base.sand*0.95,40),gravel:jitter(base.gravel*0.95,40),admixture:jitter(base.admixture*1.3,1.5),age:base.age};
-  return {cement:jitter(base.cement*0.92,25),water:jitter(base.water,10),flyash:jitter(base.flyash*1.15,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,30),gravel:jitter(base.gravel,30),admixture:jitter(base.admixture,1),age:base.age};
+  if (goal==='cheapest')         return {cement:jitter(base.cement*0.88,30), water:jitter(base.water*0.95,15), flyash:jitter(base.flyash*1.2,20), slag:jitter(base.slag*1.1,20), sand:jitter(base.sand,40), gravel:jitter(base.gravel,40), admixture:jitter(base.admixture*1.1,1), age:base.age};
+  if (goal==='lowest_co2')       return {cement:jitter(base.cement*0.78,30), water:jitter(base.water*0.95,15), flyash:jitter(base.flyash*1.5,25), slag:jitter(base.slag*1.4,25), sand:jitter(base.sand,40), gravel:jitter(base.gravel,40), admixture:jitter(base.admixture*1.2,1), age:base.age};
+  if (goal==='highest_strength') return {cement:jitter(base.cement*1.1,30), water:jitter(base.water*0.88,12), flyash:jitter(base.flyash,15), slag:jitter(base.slag,15), sand:jitter(base.sand*0.95,40), gravel:jitter(base.gravel*0.95,40), admixture:jitter(base.admixture*1.3,1.5), age:base.age};
+  return {cement:jitter(base.cement*0.92,25), water:jitter(base.water,10), flyash:jitter(base.flyash*1.15,20), slag:jitter(base.slag*1.1,20), sand:jitter(base.sand,30), gravel:jitter(base.gravel,30), admixture:jitter(base.admixture,1), age:base.age};
 }
+
 function scoreCandidate(s, c2, ct, target) {
   const pen = s < target*0.95 ? -1000*(target-s) : 0;
-  if(goal==='cheapest')         return -ct + pen;
-  if(goal==='lowest_co2')       return -c2 + pen;
-  if(goal==='highest_strength') return s;
+  if (goal==='cheapest')          return -ct + pen;
+  if (goal==='lowest_co2')        return -c2 + pen;
+  if (goal==='highest_strength')  return s;
   return -(Math.abs(s-target)*5) - ct*0.3 - c2*0.2;
 }
 
+// ── Optimizer runs synchronously — no setInterval, no freeze ──
 function runOptimize() {
   const base = getMix();
   const target = parseFloat(document.getElementById('i-target').value) || 40;
+
   let best = null, bestScore = -Infinity;
   for (let i = 0; i < 200; i++) {
     const c = makeCandidate(base);
@@ -278,6 +327,7 @@ function runOptimize() {
     const sc = scoreCandidate(s, c2, ct, target);
     if (sc > bestScore) { bestScore = sc; best = {...c, strength:s, co2:c2, cost:ct}; }
   }
+
   showResult(base, best, target);
 }
 
@@ -286,11 +336,15 @@ function showResult(base, opt, target) {
   lastResult = { base, opt, target };
   const gl = {cheapest:'Cheapest mix', lowest_co2:'Lowest CO₂', highest_strength:'Highest strength', match_target:'Match target'}[goal];
   const rows = [
-    ['Cement', base.cement, opt.cement], ['Water', base.water, opt.water],
-    ['Fly ash', base.flyash, opt.flyash], ['Slag', base.slag, opt.slag],
-    ['Sand', base.sand, opt.sand], ['Gravel', base.gravel, opt.gravel],
-    ['Admixture', base.admixture, opt.admixture],
-    ['CO₂ (kg/m³)', bc, opt.co2], ['Cost (€/m³)', bct, opt.cost],
+    ['Cement',      base.cement,    opt.cement],
+    ['Water',       base.water,     opt.water],
+    ['Fly ash',     base.flyash,    opt.flyash],
+    ['Slag',        base.slag,      opt.slag],
+    ['Sand',        base.sand,      opt.sand],
+    ['Gravel',      base.gravel,    opt.gravel],
+    ['Admixture',   base.admixture, opt.admixture],
+    ['CO₂ (kg/m³)', bc,             opt.co2],
+    ['Cost (€/m³)', bct,            opt.cost],
   ];
   document.getElementById('result-card').innerHTML = `
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:1rem">${gl}</div>
@@ -308,18 +362,25 @@ function showResult(base, opt, target) {
     </table>
     <div class="result-actions">
       <button class="btn-save" onclick="saveMix()">Save to project</button>
-      <button class="btn-save" onclick="showToast('PDF export coming soon.')">Export report</button>
+      <button class="btn-save" onclick="exportReport()">Export report</button>
     </div>`;
   showToast('Optimization complete');
 }
 
 function saveMix() {
   if (!lastResult) return;
-  const projects = load(), p = projects.find(x => x.id === projectId); if (!p) return;
+  const projects = load();
+  const p = projects.find(x => x.id === projectId); if (!p) return;
   const element = document.getElementById('i-element').value.trim();
   const gl = {cheapest:'Cheapest mix', lowest_co2:'Lowest CO₂', highest_strength:'Highest strength', match_target:'Match target'}[goal];
   p.mixes = p.mixes || [];
-  p.mixes.push({ id:uid(), name:element||gl, goal, element, strength:lastResult.opt.strength, co2:lastResult.opt.co2, cost:lastResult.opt.cost, grade:grade(lastResult.opt.strength), details:gl+' · '+lastResult.opt.strength.toFixed(1)+' MPa', ingredients:lastResult.opt, savedAt:new Date().toISOString() });
+  p.mixes.push({
+    id: uid(), name: element || gl, goal, element,
+    strength: lastResult.opt.strength, co2: lastResult.opt.co2, cost: lastResult.opt.cost,
+    grade: grade(lastResult.opt.strength),
+    details: gl + ' · ' + lastResult.opt.strength.toFixed(1) + ' MPa',
+    ingredients: lastResult.opt, savedAt: new Date().toISOString()
+  });
   save(projects); updateBadge(); showToast('Mix saved.');
 }
 
@@ -331,9 +392,15 @@ function renderMixes() {
   if (!mixes.length) { c.innerHTML = '<div class="empty-state">No mixes saved yet. Run the optimizer and save results here.</div>'; return; }
   c.innerHTML = `<div class="mix-list">${[...mixes].reverse().map(m => `
     <div class="mix-row">
-      <div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+      <div>
+        <div class="mix-name">${esc(m.name)}</div>
+        <div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
       <div class="mix-right">
-        <div><div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div><div class="mix-grade">${m.grade||''}</div></div>
+        <div>
+          <div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div>
+          <div class="mix-grade">${m.grade||''}</div>
+        </div>
         <button class="btn-del-mix" onclick="delMix('${m.id}')">✕</button>
       </div>
     </div>`).join('')}</div>`;
@@ -353,12 +420,27 @@ function renderReports() {
   c.innerHTML = `<div class="section-title">Saved mixes (${mixes.length})</div>
     <div class="mix-list">${mixes.map(m => `
       <div class="mix-row">
-        <div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div>
+        <div>
+          <div class="mix-name">${esc(m.name)}</div>
+          <div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+        </div>
         <div class="mix-right">
           <div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div>
-          <button class="btn-save" onclick="showToast('PDF export coming soon.')">Export</button>
+          <button class="btn-save" onclick="showToast('Open the Optimize tab, run the optimizer, then export.')">Export</button>
         </div>
       </div>`).join('')}</div>`;
+}
+
+function exportReport() {
+  if (!lastResult) { showToast('Run the optimizer first.'); return; }
+  const p = getProj();
+  const gl = {cheapest:'Cheapest mix', lowest_co2:'Lowest CO₂', highest_strength:'Highest strength', match_target:'Match target'}[goal];
+  // Fill print header
+  document.getElementById('print-title').textContent = p ? p.name : '—';
+  document.getElementById('print-date').textContent = 'Generated ' + new Date().toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
+  document.getElementById('print-goal').textContent = gl;
+  // Trigger browser print dialog
+  window.print();
 }
 
 function showToast(msg) {
