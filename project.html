@@ -426,7 +426,7 @@ function renderReports() {
         </div>
         <div class="mix-right">
           <div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div>
-          <button class="btn-save" onclick="showToast('Open the Optimize tab, run the optimizer, then export.')">Export</button>
+          <button class="btn-save" onclick="tab('optimize');showToast('Run the optimizer then click Export report.')">Export</button>
         </div>
       </div>`).join('')}</div>`;
 }
