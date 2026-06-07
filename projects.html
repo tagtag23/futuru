@@ -3,213 +3,353 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Futuru — Projects</title>
+<title>Futuru — Project</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: system-ui, -apple-system, sans-serif; background: #1a1a1a; color: #f0f0f0; min-height: 100vh; -webkit-font-smoothing: antialiased; }
 
 nav { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 2rem; border-bottom: 1px solid #2a2a2a; }
 .logo { font-size: 1.2rem; font-weight: 700; color: #f0f0f0; text-decoration: none; letter-spacing: -0.02em; }
-.nav-links { display: flex; gap: 2rem; }
-.nav-links a { font-size: 14px; color: #888; text-decoration: none; transition: color 0.2s; }
-.nav-links a:hover { color: #f0f0f0; }
-.nav-links a.active { color: #f0f0f0; }
+.breadcrumb { display: flex; align-items: center; gap: 0.5rem; font-size: 14px; }
+.breadcrumb a { color: #666; text-decoration: none; transition: color 0.15s; }
+.breadcrumb a:hover { color: #f0f0f0; }
+.breadcrumb span { color: #444; }
+.breadcrumb strong { color: #f0f0f0; font-weight: 600; }
 
-.header { padding: 3rem 2rem 2.5rem; max-width: 900px; margin: 0 auto; }
-.header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.4rem; }
-.header p { font-size: 0.9rem; color: #888; }
+.header { padding: 2.5rem 2rem 0; max-width: 960px; margin: 0 auto; }
+.header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
+.header-sub { font-size: 12px; color: #666; }
 
-.stats { display: flex; gap: 3rem; margin-top: 2rem; }
-.stat-val { font-size: 1.6rem; font-weight: 600; letter-spacing: -0.02em; }
-.stat-lbl { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 3px; }
+.tabs { display: flex; gap: 0; border-bottom: 1px solid #2a2a2a; margin-top: 2rem; }
+.tab { padding: 0.85rem 1.3rem; font-size: 13px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; user-select: none; }
+.tab:hover { color: #ccc; }
+.tab.active { color: #f0f0f0; border-bottom-color: #f0f0f0; }
 
-.container { max-width: 900px; margin: 0 auto; padding: 0 2rem 4rem; }
+.content { max-width: 960px; margin: 0 auto; padding: 2rem; }
+.panel { display: none; }
+.panel.active { display: block; }
 
-.new-row { display: flex; gap: 8px; margin-bottom: 2.5rem; }
-.new-input {
-  flex: 1; background: #222; border: 1px solid #333; border-radius: 8px;
-  padding: 0.75rem 1rem; font-size: 0.9rem; color: #f0f0f0;
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+@media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
+
+.section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 1rem; }
+
+.card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 1.4rem; margin-bottom: 1.2rem; }
+
+.fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field.full { grid-column: 1/-1; }
+.field label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.07em; }
+.field input {
+  background: #252525; border: 1px solid #333; border-radius: 7px;
+  padding: 0.6rem 0.75rem; font-size: 0.88rem; color: #f0f0f0;
   font-family: system-ui, sans-serif; outline: none; transition: border-color 0.2s;
 }
-.new-input::placeholder { color: #555; }
-.new-input:focus { border-color: #666; }
-.btn-add {
-  background: #f0f0f0; color: #1a1a1a; border: none; border-radius: 8px;
-  padding: 0.75rem 1.3rem; font-size: 0.88rem; font-weight: 600;
-  font-family: system-ui, sans-serif; cursor: pointer; white-space: nowrap;
-  transition: background 0.15s;
-}
-.btn-add:hover { background: #ddd; }
+.field input:focus { border-color: #666; }
+.field input::placeholder { color: #444; }
 
-.divider { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1rem; }
+.goals { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 1.1rem; }
+.goal { background: #252525; border: 1px solid #2a2a2a; border-radius: 8px; padding: 0.85rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; }
+.goal:hover { border-color: #444; }
+.goal.active { border-color: #f0f0f0; background: #222; }
+.goal-name { font-size: 13px; font-weight: 600; color: #ccc; margin-bottom: 2px; }
+.goal-desc { font-size: 11px; color: #666; line-height: 1.4; }
+.goal.active .goal-name { color: #f0f0f0; }
 
-.project-list { display: flex; flex-direction: column; gap: 1px; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; }
+.target-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 1.1rem; }
+.target-row label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; }
+.target-row input { flex: 1; background: #252525; border: 1px solid #333; border-radius: 7px; padding: 0.6rem 0.75rem; font-size: 0.88rem; color: #f0f0f0; font-family: system-ui, sans-serif; outline: none; transition: border-color 0.2s; }
+.target-row input:focus { border-color: #666; }
+.target-row span { font-size: 12px; color: #666; }
 
-.project-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 1.1rem 1.3rem; background: #1e1e1e; cursor: pointer;
-  transition: background 0.15s; gap: 1rem;
-}
-.project-row:hover { background: #242424; }
-.project-row + .project-row { border-top: 1px solid #2a2a2a; }
+.progress { display: none; margin-bottom: 1rem; }
+.progress.show { display: block; }
+.progress-text { font-size: 12px; color: #666; margin-bottom: 6px; }
+.progress-track { background: #2a2a2a; border-radius: 3px; height: 3px; }
+.progress-fill { height: 3px; background: #f0f0f0; border-radius: 3px; width: 0%; transition: width 0.15s; }
 
-.proj-left { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
-.proj-name { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.proj-sub { font-size: 12px; color: #666; margin-top: 2px; }
+.btn-run { width: 100%; background: #f0f0f0; color: #1a1a1a; border: none; border-radius: 8px; padding: 0.85rem; font-size: 0.9rem; font-weight: 700; font-family: system-ui, sans-serif; cursor: pointer; transition: background 0.15s; }
+.btn-run:hover { background: #ddd; }
+.btn-run:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
 
-.proj-right { display: flex; align-items: center; gap: 1.5rem; flex-shrink: 0; }
-.proj-count { font-size: 12px; color: #666; }
-.btn-open {
-  background: transparent; border: 1px solid #333; border-radius: 6px;
-  padding: 5px 14px; font-size: 12px; font-weight: 600; color: #ccc;
-  cursor: pointer; font-family: system-ui, sans-serif; transition: border-color 0.15s, color 0.15s;
-}
-.btn-open:hover { border-color: #f0f0f0; color: #f0f0f0; }
-.btn-del {
-  background: none; border: none; color: #444; cursor: pointer; font-size: 13px;
-  padding: 4px 6px; border-radius: 5px; transition: color 0.15s;
-}
-.btn-del:hover { color: #ef4444; }
+.result-empty { text-align: center; padding: 3rem 1rem; color: #555; font-size: 13px; line-height: 1.7; }
 
-.empty {
-  text-align: center; padding: 4rem 2rem;
-  border: 1px dashed #2a2a2a; border-radius: 10px;
-  color: #555; font-size: 0.9rem;
-}
-.empty h3 { font-size: 1rem; color: #666; margin-bottom: 0.4rem; font-weight: 500; }
+.result-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin-bottom: 1.4rem; }
+.metric { background: #252525; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1rem; text-align: center; }
+.metric-val { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.02em; }
+.metric-val.green { color: #5fba7d; }
+.metric-val.white { color: #f0f0f0; }
+.metric-val.muted { color: #aaa; }
+.metric-lbl { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 4px; }
 
-.toast {
-  position: fixed; bottom: 2rem; right: 2rem; background: #2a2a2a;
-  color: #f0f0f0; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.88rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5); transform: translateY(60px); opacity: 0;
-  transition: all 0.2s; z-index: 300; pointer-events: none;
-}
+.compare { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 1.2rem; }
+.compare th { text-align: left; padding: 0.5rem 0.6rem; font-size: 10px; text-transform: uppercase; letter-spacing: 0.07em; color: #555; border-bottom: 1px solid #2a2a2a; }
+.compare th:not(:first-child) { text-align: right; }
+.compare td { padding: 0.5rem 0.6rem; border-bottom: 1px solid #222; color: #888; }
+.compare td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+.compare td:first-child { color: #ccc; }
+.compare .pos { color: #ef4444; }
+.compare .neg { color: #5fba7d; }
+
+.result-actions { display: flex; gap: 0.6rem; }
+.btn-save { flex: 1; background: transparent; border: 1px solid #333; border-radius: 7px; padding: 0.65rem; font-size: 12px; font-weight: 600; color: #ccc; cursor: pointer; font-family: system-ui, sans-serif; transition: border-color 0.15s, color 0.15s; }
+.btn-save:hover { border-color: #f0f0f0; color: #f0f0f0; }
+
+.mix-list { display: flex; flex-direction: column; border: 1px solid #2a2a2a; border-radius: 10px; overflow: hidden; }
+.mix-row { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.2rem; background: #1e1e1e; gap: 1rem; }
+.mix-row + .mix-row { border-top: 1px solid #2a2a2a; }
+.mix-name { font-size: 0.88rem; font-weight: 600; margin-bottom: 2px; }
+.mix-detail { font-size: 11px; color: #666; }
+.mix-right { display: flex; align-items: center; gap: 1.2rem; flex-shrink: 0; }
+.mix-mpa { font-size: 1rem; font-weight: 600; color: #5fba7d; }
+.mix-grade { font-size: 10px; color: #888; margin-top: 2px; }
+.btn-del-mix { background: none; border: none; color: #444; cursor: pointer; font-size: 12px; padding: 4px 6px; border-radius: 5px; transition: color 0.15s; }
+.btn-del-mix:hover { color: #ef4444; }
+
+.empty-state { text-align: center; padding: 3rem 2rem; border: 1px dashed #2a2a2a; border-radius: 10px; color: #555; font-size: 13px; }
+
+.toast { position: fixed; bottom: 2rem; right: 2rem; background: #2a2a2a; color: #f0f0f0; padding: 0.8rem 1.2rem; border-radius: 8px; font-size: 0.88rem; box-shadow: 0 4px 20px rgba(0,0,0,0.5); transform: translateY(60px); opacity: 0; transition: all 0.2s; z-index: 300; pointer-events: none; }
 .toast.show { transform: translateY(0); opacity: 1; }
 
-footer { text-align: center; padding: 2rem; font-size: 12px; color: #444; border-top: 1px solid #2a2a2a; }
+footer { text-align: center; padding: 2rem; font-size: 12px; color: #444; border-top: 1px solid #2a2a2a; margin-top: 2rem; }
 </style>
 </head>
 <body>
 
 <nav>
   <a href="projects.html" class="logo">Futuru</a>
-  <div class="nav-links">
-    <a href="projects.html" class="active">Projects</a>
-    <a href="mixer.html">Mix Tester</a>
-    <a href="optimizer.html">Optimizer</a>
+  <div class="breadcrumb">
+    <a href="projects.html">Projects</a>
+    <span>/</span>
+    <strong id="nav-name">—</strong>
   </div>
 </nav>
 
 <div class="header">
-  <h1>Projects</h1>
-  <p>Select a project to open its mixes and optimizer.</p>
-  <div class="stats">
-    <div>
-      <div class="stat-val" id="stat-projects">0</div>
-      <div class="stat-lbl">Projects</div>
-    </div>
-    <div>
-      <div class="stat-val" id="stat-mixes">0</div>
-      <div class="stat-lbl">Saved mixes</div>
-    </div>
-    <div>
-      <div class="stat-val" id="stat-last">—</div>
-      <div class="stat-lbl">Last saved</div>
-    </div>
+  <h1 id="proj-title">—</h1>
+  <div class="header-sub" id="proj-sub">—</div>
+  <div class="tabs">
+    <div class="tab active" onclick="tab('optimize')">Optimize</div>
+    <div class="tab" onclick="tab('mixes')">Mixes <span id="mix-count-badge"></span></div>
+    <div class="tab" onclick="tab('reports')">Reports</div>
   </div>
 </div>
 
-<div class="container">
-  <div class="new-row">
-    <input type="text" class="new-input" id="new-input" placeholder="New project name — e.g. Bridge A, Harbour Expansion…" maxlength="80" />
-    <button class="btn-add" onclick="createProject()">+ New Project</button>
+<div class="content">
+
+  <div class="panel active" id="panel-optimize">
+    <div class="two-col">
+      <div>
+        <div class="section-title">Current mix (kg/m³)</div>
+        <div class="card">
+          <div class="fields">
+            <div class="field"><label>Cement</label><input type="number" id="i-cement" placeholder="320" min="0"/></div>
+            <div class="field"><label>Water</label><input type="number" id="i-water" placeholder="165" min="0"/></div>
+            <div class="field"><label>Fly Ash</label><input type="number" id="i-flyash" placeholder="50" min="0"/></div>
+            <div class="field"><label>Slag</label><input type="number" id="i-slag" placeholder="80" min="0"/></div>
+            <div class="field"><label>Sand</label><input type="number" id="i-sand" placeholder="780" min="0"/></div>
+            <div class="field"><label>Gravel</label><input type="number" id="i-gravel" placeholder="1020" min="0"/></div>
+            <div class="field"><label>Admixture</label><input type="number" id="i-admixture" placeholder="4" min="0" step="0.1"/></div>
+            <div class="field"><label>Age (days)</label><input type="number" id="i-age" placeholder="28" min="1"/></div>
+            <div class="field full"><label>Element / part (optional)</label><input type="text" id="i-element" placeholder="e.g. Foundation, Pillar A…"/></div>
+          </div>
+        </div>
+
+        <div class="section-title">Optimization goal</div>
+        <div class="card">
+          <div class="goals">
+            <div class="goal active" data-goal="cheapest" onclick="setGoal(this)">
+              <div class="goal-name">Cheapest mix</div>
+              <div class="goal-desc">Hit target strength at lowest cost</div>
+            </div>
+            <div class="goal" data-goal="lowest_co2" onclick="setGoal(this)">
+              <div class="goal-name">Lowest CO₂</div>
+              <div class="goal-desc">Hit target strength with least emissions</div>
+            </div>
+            <div class="goal" data-goal="highest_strength" onclick="setGoal(this)">
+              <div class="goal-name">Highest strength</div>
+              <div class="goal-desc">Maximize strength within constraints</div>
+            </div>
+            <div class="goal" data-goal="match_target" onclick="setGoal(this)">
+              <div class="goal-name">Match target</div>
+              <div class="goal-desc">Same strength, reduce cement & CO₂</div>
+            </div>
+          </div>
+          <div class="target-row">
+            <label>Target</label>
+            <input type="number" id="i-target" placeholder="40" min="10" max="100"/>
+            <span>MPa</span>
+          </div>
+          <div class="progress" id="progress">
+            <div class="progress-text" id="progress-text">Running…</div>
+            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+          </div>
+          <button class="btn-run" id="btn-run" onclick="runOptimize()">Run optimizer →</button>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title">Result</div>
+        <div class="card" id="result-card">
+          <div class="result-empty">Enter your current mix and choose a goal,<br>then press <strong>Run optimizer →</strong></div>
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="divider" id="list-label">All projects</div>
-  <div id="project-list"></div>
+
+  <div class="panel" id="panel-mixes">
+    <div class="section-title" id="mixes-label">Saved mixes</div>
+    <div id="mixes-container"></div>
+  </div>
+
+  <div class="panel" id="panel-reports">
+    <div id="reports-container"></div>
+  </div>
+
 </div>
 
 <footer>Futuru © 2026 — Built on BOxCrete open source</footer>
 <div class="toast" id="toast"></div>
 
 <script>
-function load() { try { return JSON.parse(localStorage.getItem('futuru-projects') || '[]'); } catch { return []; } }
+let projectId = null, goal = 'cheapest', lastResult = null;
+
+function load() { try { return JSON.parse(localStorage.getItem('futuru-projects')||'[]'); } catch { return []; } }
 function save(p) { localStorage.setItem('futuru-projects', JSON.stringify(p)); }
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+function getProj() { return load().find(p => p.id === projectId)||null; }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function render() {
-  const projects = load();
-  const totalMixes = projects.reduce((s,p) => s + (p.mixes||[]).length, 0);
-  document.getElementById('stat-projects').textContent = projects.length;
-  document.getElementById('stat-mixes').textContent = totalMixes;
-  let latest = null;
-  projects.forEach(p => (p.mixes||[]).forEach(m => { if (!latest || m.savedAt > latest) latest = m.savedAt; }));
-  document.getElementById('stat-last').textContent = latest
-    ? new Date(latest).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '—';
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  projectId = params.get('id');
+  if (!projectId) { location.href='projects.html'; return; }
+  const p = getProj();
+  if (!p) { location.href='projects.html'; return; }
+  document.getElementById('nav-name').textContent = p.name;
+  document.getElementById('proj-title').textContent = p.name;
+  document.getElementById('proj-sub').textContent = 'Created ' + new Date(p.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.title = 'Futuru — ' + p.name;
+  updateBadge();
+})();
 
-  document.getElementById('list-label').textContent = projects.length ? `All projects (${projects.length})` : 'All projects';
-  const list = document.getElementById('project-list');
+function updateBadge() {
+  const p = getProj(); if (!p) return;
+  const n = (p.mixes||[]).length;
+  document.getElementById('mix-count-badge').textContent = n ? '('+n+')' : '';
+}
 
-  if (!projects.length) {
-    list.innerHTML = `<div class="empty"><h3>No projects yet</h3>Type a name above and press + New Project.</div>`;
-    return;
-  }
+function tab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['optimize','mixes','reports'][i]===name));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name==='mixes') renderMixes();
+  if (name==='reports') renderReports();
+}
 
-  list.innerHTML = `<div class="project-list">${projects.map(p => {
-    const mixes = p.mixes || [];
-    const last = mixes.length ? new Date(mixes[mixes.length-1].savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : null;
-    return `<div class="project-row" onclick="openProject('${p.id}')">
-      <div class="proj-left">
-        <div>
-          <div class="proj-name">${esc(p.name)}</div>
-          <div class="proj-sub">${last ? 'Last mix: '+last : 'No mixes yet'}</div>
-        </div>
-      </div>
-      <div class="proj-right">
-        <span class="proj-count">${mixes.length} mix${mixes.length!==1?'es':''}</span>
-        <button class="btn-open" onclick="event.stopPropagation();openProject('${p.id}')">Open →</button>
-        <button class="btn-del" onclick="event.stopPropagation();deleteProject('${p.id}')" title="Delete">✕</button>
-      </div>
+function setGoal(el) {
+  document.querySelectorAll('.goal').forEach(g => g.classList.remove('active'));
+  el.classList.add('active');
+  goal = el.dataset.goal;
+}
+
+function v(id, def) { return parseFloat(document.getElementById(id).value)||def; }
+function getMix() { return { cement:v('i-cement',320), water:v('i-water',165), flyash:v('i-flyash',50), slag:v('i-slag',80), sand:v('i-sand',780), gravel:v('i-gravel',1020), admixture:v('i-admixture',4), age:v('i-age',28) }; }
+function strength(m) { const wc=m.water/(m.cement+0.3*m.flyash+0.4*m.slag); const age=m.age>=28?1:(m.age/28)*0.85; return Math.max(10,Math.min(90,85*Math.exp(-3.2*wc)*age+(m.admixture>0?2.5:0))); }
+function co2(m) { return m.cement*0.82+m.flyash*0.027+m.slag*0.05+m.sand*0.005+m.gravel*0.004+m.water*0.0003+m.admixture*1.2; }
+function cost(m) { return m.cement*0.19+m.flyash*0.08+m.slag*0.06+m.sand*0.025+m.gravel*0.02+m.water*0.001+m.admixture*2.8; }
+function grade(mpa) { if(mpa>=60)return'C55/67';if(mpa>=50)return'C45/55';if(mpa>=45)return'C40/50';if(mpa>=40)return'C35/45';if(mpa>=35)return'C30/37';if(mpa>=30)return'C25/30';if(mpa>=25)return'C20/25';return'C16/20'; }
+function jitter(v,r) { return Math.max(0,v+(Math.random()-0.5)*2*r); }
+function candidate(base) {
+  if(goal==='cheapest') return {cement:jitter(base.cement*0.88,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.2,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.1,1),age:base.age};
+  if(goal==='lowest_co2') return {cement:jitter(base.cement*0.78,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.5,25),slag:jitter(base.slag*1.4,25),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.2,1),age:base.age};
+  if(goal==='highest_strength') return {cement:jitter(base.cement*1.1,30),water:jitter(base.water*0.88,12),flyash:jitter(base.flyash,15),slag:jitter(base.slag,15),sand:jitter(base.sand*0.95,40),gravel:jitter(base.gravel*0.95,40),admixture:jitter(base.admixture*1.3,1.5),age:base.age};
+  return {cement:jitter(base.cement*0.92,25),water:jitter(base.water,10),flyash:jitter(base.flyash*1.15,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,30),gravel:jitter(base.gravel,30),admixture:jitter(base.admixture,1),age:base.age};
+}
+function score(s,c2,ct,target) {
+  const pen=s<target*0.95?-1000*(target-s):0;
+  if(goal==='cheapest') return -ct+pen;
+  if(goal==='lowest_co2') return -c2+pen;
+  if(goal==='highest_strength') return s;
+  return -(Math.abs(s-target)*5)-ct*0.3-c2*0.2;
+}
+
+function runOptimize() {
+  const base=getMix(), target=parseFloat(document.getElementById('i-target').value)||40;
+  document.getElementById('btn-run').disabled=true;
+  document.getElementById('result-card').innerHTML='<div class="result-empty">Running…</div>';
+  const prog=document.getElementById('progress'); prog.classList.add('show');
+  const fill=document.getElementById('progress-fill'), txt=document.getElementById('progress-text');
+  let best=null,bestScore=-Infinity,trial=0,N=40;
+  const iv=setInterval(()=>{
+    trial++;
+    txt.textContent='Trial '+trial+' of '+N;
+    fill.style.width=(trial/N*100)+'%';
+    const c=candidate(base),s=strength(c),c2=co2(c),ct=cost(c),sc=score(s,c2,ct,target);
+    if(sc>bestScore){bestScore=sc;best={...c,strength:s,co2:c2,cost:ct};}
+    if(trial>=N){clearInterval(iv);prog.classList.remove('show');document.getElementById('btn-run').disabled=false;showResult(base,best,target);}
+  },50);
+}
+
+function showResult(base,opt,target) {
+  const bc=co2(base),bct=cost(base);
+  lastResult={base,opt,target};
+  const gl={cheapest:'Cheapest mix',lowest_co2:'Lowest CO₂',highest_strength:'Highest strength',match_target:'Match target'}[goal];
+  const rows=[['Cement',base.cement,opt.cement],['Water',base.water,opt.water],['Fly ash',base.flyash,opt.flyash],['Slag',base.slag,opt.slag],['Sand',base.sand,opt.sand],['Gravel',base.gravel,opt.gravel],['Admixture',base.admixture,opt.admixture],['CO₂ (kg/m³)',bc,opt.co2],['Cost (€/m³)',bct,opt.cost]];
+  document.getElementById('result-card').innerHTML=`
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:1rem">${gl}</div>
+    <div class="result-metrics">
+      <div class="metric"><div class="metric-val green">${opt.strength.toFixed(1)}</div><div class="metric-lbl">MPa</div></div>
+      <div class="metric"><div class="metric-val white">€${opt.cost.toFixed(0)}</div><div class="metric-lbl">Cost / m³</div></div>
+      <div class="metric"><div class="metric-val muted">${opt.co2.toFixed(0)}</div><div class="metric-lbl">kg CO₂</div></div>
+    </div>
+    <table class="compare"><thead><tr><th>Ingredient</th><th>Current</th><th>Optimized</th><th>Δ</th></tr></thead>
+    <tbody>${rows.map(([l,cur,opv])=>{const d=opv-cur,ds=(d>=0?'+':'')+d.toFixed(1),cls=d<-0.5?'neg':d>0.5?'pos':'';return`<tr><td>${l}</td><td>${typeof cur==='number'?cur.toFixed(1):cur}</td><td>${typeof opv==='number'?opv.toFixed(1):opv}</td><td class="${cls}">${ds}</td></tr>`;}).join('')}</tbody></table>
+    <div class="result-actions">
+      <button class="btn-save" onclick="saveMix()">Save to project</button>
+      <button class="btn-save" onclick="showToast('PDF export coming soon.')">Export report</button>
     </div>`;
-  }).join('')}</div>`;
+  showToast('Optimization complete');
 }
 
-function openProject(id) { window.location.href = 'project.html?id=' + id; }
-
-function createProject() {
-  const input = document.getElementById('new-input');
-  const name = input.value.trim();
-  if (!name) { input.focus(); return; }
-  const projects = load();
-  if (projects.find(p => p.name.toLowerCase() === name.toLowerCase())) { showToast('Project name already exists.'); return; }
-  const p = { id: uid(), name, mixes: [], createdAt: new Date().toISOString() };
-  projects.unshift(p);
-  save(projects);
-  input.value = '';
-  render();
-  showToast('Project "' + name + '" created');
-  setTimeout(() => openProject(p.id), 500);
+function saveMix() {
+  if(!lastResult) return;
+  const projects=load(), p=projects.find(x=>x.id===projectId); if(!p) return;
+  const element=document.getElementById('i-element').value.trim();
+  const gl={cheapest:'Cheapest mix',lowest_co2:'Lowest CO₂',highest_strength:'Highest strength',match_target:'Match target'}[goal];
+  p.mixes=p.mixes||[];
+  p.mixes.push({id:uid(),name:element||gl,goal,element,strength:lastResult.opt.strength,co2:lastResult.opt.co2,cost:lastResult.opt.cost,grade:grade(lastResult.opt.strength),details:gl+' · '+lastResult.opt.strength.toFixed(1)+' MPa',ingredients:lastResult.opt,savedAt:new Date().toISOString()});
+  save(projects); updateBadge(); showToast('Mix saved.');
 }
 
-function deleteProject(id) {
-  const projects = load();
-  const p = projects.find(x => x.id === id);
-  if (!p || !confirm(`Delete "${p.name}" and all its mixes?`)) return;
-  save(projects.filter(x => x.id !== id));
-  render();
-  showToast('Project deleted.');
+function renderMixes() {
+  const p=getProj(); if(!p) return;
+  const mixes=p.mixes||[];
+  document.getElementById('mixes-label').textContent='Saved mixes'+(mixes.length?' ('+mixes.length+')':'');
+  const c=document.getElementById('mixes-container');
+  if(!mixes.length){c.innerHTML='<div class="empty-state">No mixes saved yet. Run the optimizer and save results here.</div>';return;}
+  c.innerHTML=`<div class="mix-list">${[...mixes].reverse().map(m=>`<div class="mix-row"><div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div><div class="mix-right"><div><div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div><div class="mix-grade">${m.grade||''}</div></div><button class="btn-del-mix" onclick="delMix('${m.id}')">✕</button></div></div>`).join('')}</div>`;
 }
 
-document.getElementById('new-input').addEventListener('keydown', e => { if (e.key === 'Enter') createProject(); });
+function delMix(id) {
+  const projects=load(),p=projects.find(x=>x.id===projectId); if(!p) return;
+  p.mixes=(p.mixes||[]).filter(m=>m.id!==id);
+  save(projects); updateBadge(); renderMixes(); showToast('Mix removed.');
+}
+
+function renderReports() {
+  const p=getProj(); if(!p) return;
+  const mixes=p.mixes||[];
+  const c=document.getElementById('reports-container');
+  if(!mixes.length){c.innerHTML='<div class="empty-state">No mixes to report yet. Save mixes from the Optimize tab.</div>';return;}
+  c.innerHTML=`<div class="section-title">Saved mixes (${mixes.length})</div><div class="mix-list">${mixes.map(m=>`<div class="mix-row"><div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div><div class="mix-right"><div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div><button class="btn-save" onclick="showToast('PDF export coming soon.')">Export</button></div></div>`).join('')}</div>`;
+}
 
 function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
 }
-
-render();
 </script>
 </body>
 </html>
