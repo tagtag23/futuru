@@ -20,7 +20,7 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .header h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 0.3rem; }
 .header-sub { font-size: 12px; color: #666; }
 
-.tabs { display: flex; gap: 0; border-bottom: 1px solid #2a2a2a; margin-top: 2rem; }
+.tabs { display: flex; border-bottom: 1px solid #2a2a2a; margin-top: 2rem; }
 .tab { padding: 0.85rem 1.3rem; font-size: 13px; font-weight: 500; color: #666; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s, border-color 0.15s; user-select: none; }
 .tab:hover { color: #ccc; }
 .tab.active { color: #f0f0f0; border-bottom-color: #f0f0f0; }
@@ -33,18 +33,13 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 @media (max-width: 680px) { .two-col { grid-template-columns: 1fr; } }
 
 .section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #555; margin-bottom: 1rem; }
-
 .card { background: #1e1e1e; border: 1px solid #2a2a2a; border-radius: 10px; padding: 1.4rem; margin-bottom: 1.2rem; }
 
 .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field.full { grid-column: 1/-1; }
 .field label { font-size: 11px; color: #666; text-transform: uppercase; letter-spacing: 0.07em; }
-.field input {
-  background: #252525; border: 1px solid #333; border-radius: 7px;
-  padding: 0.6rem 0.75rem; font-size: 0.88rem; color: #f0f0f0;
-  font-family: system-ui, sans-serif; outline: none; transition: border-color 0.2s;
-}
+.field input { background: #252525; border: 1px solid #333; border-radius: 7px; padding: 0.6rem 0.75rem; font-size: 0.88rem; color: #f0f0f0; font-family: system-ui, sans-serif; outline: none; transition: border-color 0.2s; }
 .field input:focus { border-color: #666; }
 .field input::placeholder { color: #444; }
 
@@ -62,15 +57,8 @@ nav { display: flex; align-items: center; justify-content: space-between; paddin
 .target-row input:focus { border-color: #666; }
 .target-row span { font-size: 12px; color: #666; }
 
-.progress { display: none; margin-bottom: 1rem; }
-.progress.show { display: block; }
-.progress-text { font-size: 12px; color: #666; margin-bottom: 6px; }
-.progress-track { background: #2a2a2a; border-radius: 3px; height: 3px; }
-.progress-fill { height: 3px; background: #f0f0f0; border-radius: 3px; width: 0%; transition: width 0.15s; }
-
 .btn-run { width: 100%; background: #f0f0f0; color: #1a1a1a; border: none; border-radius: 8px; padding: 0.85rem; font-size: 0.9rem; font-weight: 700; font-family: system-ui, sans-serif; cursor: pointer; transition: background 0.15s; }
 .btn-run:hover { background: #ddd; }
-.btn-run:disabled { background: #2a2a2a; color: #555; cursor: not-allowed; }
 
 .result-empty { text-align: center; padding: 3rem 1rem; color: #555; font-size: 13px; line-height: 1.7; }
 
@@ -180,10 +168,6 @@ footer { text-align: center; padding: 2rem; font-size: 12px; color: #444; border
             <input type="number" id="i-target" placeholder="40" min="10" max="100"/>
             <span>MPa</span>
           </div>
-          <div class="progress" id="progress">
-            <div class="progress-text" id="progress-text">Running…</div>
-            <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
-          </div>
           <button class="btn-run" id="btn-run" onclick="runOptimize()">Run optimizer →</button>
         </div>
       </div>
@@ -216,19 +200,20 @@ let projectId = null, goal = 'cheapest', lastResult = null;
 
 function load() { try { return JSON.parse(localStorage.getItem('futuru-projects')||'[]'); } catch { return []; } }
 function save(p) { localStorage.setItem('futuru-projects', JSON.stringify(p)); }
-function getProj() { return load().find(p => p.id === projectId)||null; }
-function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function getProj() { return load().find(p => p.id === projectId) || null; }
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// Init
 (function() {
   const params = new URLSearchParams(window.location.search);
   projectId = params.get('id');
-  if (!projectId) { location.href='projects.html'; return; }
+  if (!projectId) { location.href = 'projects.html'; return; }
   const p = getProj();
-  if (!p) { location.href='projects.html'; return; }
+  if (!p) { location.href = 'projects.html'; return; }
   document.getElementById('nav-name').textContent = p.name;
   document.getElementById('proj-title').textContent = p.name;
-  document.getElementById('proj-sub').textContent = 'Created ' + new Date(p.createdAt).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('proj-sub').textContent = 'Created ' + new Date(p.createdAt).toLocaleDateString('en-GB', {day:'numeric', month:'long', year:'numeric'});
   document.title = 'Futuru — ' + p.name;
   updateBadge();
 })();
@@ -236,15 +221,15 @@ function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').re
 function updateBadge() {
   const p = getProj(); if (!p) return;
   const n = (p.mixes||[]).length;
-  document.getElementById('mix-count-badge').textContent = n ? '('+n+')' : '';
+  document.getElementById('mix-count-badge').textContent = n ? '(' + n + ')' : '';
 }
 
 function tab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['optimize','mixes','reports'][i]===name));
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['optimize','mixes','reports'][i] === name));
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('panel-'+name).classList.add('active');
-  if (name==='mixes') renderMixes();
-  if (name==='reports') renderReports();
+  document.getElementById('panel-' + name).classList.add('active');
+  if (name === 'mixes') renderMixes();
+  if (name === 'reports') renderReports();
 }
 
 function setGoal(el) {
@@ -253,58 +238,85 @@ function setGoal(el) {
   goal = el.dataset.goal;
 }
 
-function v(id, def) { return parseFloat(document.getElementById(id).value)||def; }
-function getMix() { return { cement:v('i-cement',320), water:v('i-water',165), flyash:v('i-flyash',50), slag:v('i-slag',80), sand:v('i-sand',780), gravel:v('i-gravel',1020), admixture:v('i-admixture',4), age:v('i-age',28) }; }
-function strength(m) { const wc=m.water/(m.cement+0.3*m.flyash+0.4*m.slag); const age=m.age>=28?1:(m.age/28)*0.85; return Math.max(10,Math.min(90,85*Math.exp(-3.2*wc)*age+(m.admixture>0?2.5:0))); }
-function co2(m) { return m.cement*0.82+m.flyash*0.027+m.slag*0.05+m.sand*0.005+m.gravel*0.004+m.water*0.0003+m.admixture*1.2; }
-function cost(m) { return m.cement*0.19+m.flyash*0.08+m.slag*0.06+m.sand*0.025+m.gravel*0.02+m.water*0.001+m.admixture*2.8; }
-function grade(mpa) { if(mpa>=60)return'C55/67';if(mpa>=50)return'C45/55';if(mpa>=45)return'C40/50';if(mpa>=40)return'C35/45';if(mpa>=35)return'C30/37';if(mpa>=30)return'C25/30';if(mpa>=25)return'C20/25';return'C16/20'; }
-function jitter(v,r) { return Math.max(0,v+(Math.random()-0.5)*2*r); }
-function candidate(base) {
-  if(goal==='cheapest') return {cement:jitter(base.cement*0.88,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.2,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.1,1),age:base.age};
-  if(goal==='lowest_co2') return {cement:jitter(base.cement*0.78,30),water:jitter(base.water*0.95,15),flyash:jitter(base.flyash*1.5,25),slag:jitter(base.slag*1.4,25),sand:jitter(base.sand,40),gravel:jitter(base.gravel,40),admixture:jitter(base.admixture*1.2,1),age:base.age};
-  if(goal==='highest_strength') return {cement:jitter(base.cement*1.1,30),water:jitter(base.water*0.88,12),flyash:jitter(base.flyash,15),slag:jitter(base.slag,15),sand:jitter(base.sand*0.95,40),gravel:jitter(base.gravel*0.95,40),admixture:jitter(base.admixture*1.3,1.5),age:base.age};
-  return {cement:jitter(base.cement*0.92,25),water:jitter(base.water,10),flyash:jitter(base.flyash*1.15,20),slag:jitter(base.slag*1.1,20),sand:jitter(base.sand,30),gravel:jitter(base.gravel,30),admixture:jitter(base.admixture,1),age:base.age};
+// Model helpers
+function v(id, def) { return parseFloat(document.getElementById(id).value) || def; }
+function getMix() {
+  return { cement:v('i-cement',320), water:v('i-water',165), flyash:v('i-flyash',50), slag:v('i-slag',80), sand:v('i-sand',780), gravel:v('i-gravel',1020), admixture:v('i-admixture',4), age:v('i-age',28) };
 }
-function score(s,c2,ct,target) {
-  const pen=s<target*0.95?-1000*(target-s):0;
-  if(goal==='cheapest') return -ct+pen;
-  if(goal==='lowest_co2') return -c2+pen;
-  if(goal==='highest_strength') return s;
-  return -(Math.abs(s-target)*5)-ct*0.3-c2*0.2;
+function strength(m) {
+  const wc = m.water / (m.cement + 0.3*m.flyash + 0.4*m.slag);
+  const af = m.age >= 28 ? 1 : (m.age/28)*0.85;
+  return Math.max(10, Math.min(90, 85 * Math.exp(-3.2*wc) * af + (m.admixture > 0 ? 2.5 : 0)));
+}
+function co2(m) { return m.cement*0.82 + m.flyash*0.027 + m.slag*0.05 + m.sand*0.005 + m.gravel*0.004 + m.water*0.0003 + m.admixture*1.2; }
+function cost(m) { return m.cement*0.19 + m.flyash*0.08 + m.slag*0.06 + m.sand*0.025 + m.gravel*0.02 + m.water*0.001 + m.admixture*2.8; }
+function grade(mpa) {
+  if(mpa>=60)return'C55/67'; if(mpa>=50)return'C45/55'; if(mpa>=45)return'C40/50';
+  if(mpa>=40)return'C35/45'; if(mpa>=35)return'C30/37'; if(mpa>=30)return'C25/30';
+  if(mpa>=25)return'C20/25'; return'C16/20';
+}
+function jitter(val, range) { return Math.max(0, val + (Math.random()-0.5)*2*range); }
+
+function makeCandidate(base) {
+  if (goal==='cheapest')         return {cement:jitter(base.cement*0.88,30), water:jitter(base.water*0.95,15), flyash:jitter(base.flyash*1.2,20), slag:jitter(base.slag*1.1,20), sand:jitter(base.sand,40), gravel:jitter(base.gravel,40), admixture:jitter(base.admixture*1.1,1), age:base.age};
+  if (goal==='lowest_co2')       return {cement:jitter(base.cement*0.78,30), water:jitter(base.water*0.95,15), flyash:jitter(base.flyash*1.5,25), slag:jitter(base.slag*1.4,25), sand:jitter(base.sand,40), gravel:jitter(base.gravel,40), admixture:jitter(base.admixture*1.2,1), age:base.age};
+  if (goal==='highest_strength') return {cement:jitter(base.cement*1.1,30), water:jitter(base.water*0.88,12), flyash:jitter(base.flyash,15), slag:jitter(base.slag,15), sand:jitter(base.sand*0.95,40), gravel:jitter(base.gravel*0.95,40), admixture:jitter(base.admixture*1.3,1.5), age:base.age};
+  return {cement:jitter(base.cement*0.92,25), water:jitter(base.water,10), flyash:jitter(base.flyash*1.15,20), slag:jitter(base.slag*1.1,20), sand:jitter(base.sand,30), gravel:jitter(base.gravel,30), admixture:jitter(base.admixture,1), age:base.age};
 }
 
+function scoreCandidate(s, c2, ct, target) {
+  const pen = s < target*0.95 ? -1000*(target-s) : 0;
+  if (goal==='cheapest')          return -ct + pen;
+  if (goal==='lowest_co2')        return -c2 + pen;
+  if (goal==='highest_strength')  return s;
+  return -(Math.abs(s-target)*5) - ct*0.3 - c2*0.2;
+}
+
+// ── Optimizer runs synchronously — no setInterval, no freeze ──
 function runOptimize() {
-  const base=getMix(), target=parseFloat(document.getElementById('i-target').value)||40;
-  document.getElementById('btn-run').disabled=true;
-  document.getElementById('result-card').innerHTML='<div class="result-empty">Running…</div>';
-  const prog=document.getElementById('progress'); prog.classList.add('show');
-  const fill=document.getElementById('progress-fill'), txt=document.getElementById('progress-text');
-  let best=null,bestScore=-Infinity,trial=0,N=40;
-  const iv=setInterval(()=>{
-    trial++;
-    txt.textContent='Trial '+trial+' of '+N;
-    fill.style.width=(trial/N*100)+'%';
-    const c=candidate(base),s=strength(c),c2=co2(c),ct=cost(c),sc=score(s,c2,ct,target);
-    if(sc>bestScore){bestScore=sc;best={...c,strength:s,co2:c2,cost:ct};}
-    if(trial>=N){clearInterval(iv);prog.classList.remove('show');document.getElementById('btn-run').disabled=false;showResult(base,best,target);}
-  },50);
+  const base = getMix();
+  const target = parseFloat(document.getElementById('i-target').value) || 40;
+
+  let best = null, bestScore = -Infinity;
+  for (let i = 0; i < 200; i++) {
+    const c = makeCandidate(base);
+    const s = strength(c), c2 = co2(c), ct = cost(c);
+    const sc = scoreCandidate(s, c2, ct, target);
+    if (sc > bestScore) { bestScore = sc; best = {...c, strength:s, co2:c2, cost:ct}; }
+  }
+
+  showResult(base, best, target);
 }
 
-function showResult(base,opt,target) {
-  const bc=co2(base),bct=cost(base);
-  lastResult={base,opt,target};
-  const gl={cheapest:'Cheapest mix',lowest_co2:'Lowest CO₂',highest_strength:'Highest strength',match_target:'Match target'}[goal];
-  const rows=[['Cement',base.cement,opt.cement],['Water',base.water,opt.water],['Fly ash',base.flyash,opt.flyash],['Slag',base.slag,opt.slag],['Sand',base.sand,opt.sand],['Gravel',base.gravel,opt.gravel],['Admixture',base.admixture,opt.admixture],['CO₂ (kg/m³)',bc,opt.co2],['Cost (€/m³)',bct,opt.cost]];
-  document.getElementById('result-card').innerHTML=`
+function showResult(base, opt, target) {
+  const bc = co2(base), bct = cost(base);
+  lastResult = { base, opt, target };
+  const gl = {cheapest:'Cheapest mix', lowest_co2:'Lowest CO₂', highest_strength:'Highest strength', match_target:'Match target'}[goal];
+  const rows = [
+    ['Cement',      base.cement,    opt.cement],
+    ['Water',       base.water,     opt.water],
+    ['Fly ash',     base.flyash,    opt.flyash],
+    ['Slag',        base.slag,      opt.slag],
+    ['Sand',        base.sand,      opt.sand],
+    ['Gravel',      base.gravel,    opt.gravel],
+    ['Admixture',   base.admixture, opt.admixture],
+    ['CO₂ (kg/m³)', bc,             opt.co2],
+    ['Cost (€/m³)', bct,            opt.cost],
+  ];
+  document.getElementById('result-card').innerHTML = `
     <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#555;margin-bottom:1rem">${gl}</div>
     <div class="result-metrics">
       <div class="metric"><div class="metric-val green">${opt.strength.toFixed(1)}</div><div class="metric-lbl">MPa</div></div>
       <div class="metric"><div class="metric-val white">€${opt.cost.toFixed(0)}</div><div class="metric-lbl">Cost / m³</div></div>
       <div class="metric"><div class="metric-val muted">${opt.co2.toFixed(0)}</div><div class="metric-lbl">kg CO₂</div></div>
     </div>
-    <table class="compare"><thead><tr><th>Ingredient</th><th>Current</th><th>Optimized</th><th>Δ</th></tr></thead>
-    <tbody>${rows.map(([l,cur,opv])=>{const d=opv-cur,ds=(d>=0?'+':'')+d.toFixed(1),cls=d<-0.5?'neg':d>0.5?'pos':'';return`<tr><td>${l}</td><td>${typeof cur==='number'?cur.toFixed(1):cur}</td><td>${typeof opv==='number'?opv.toFixed(1):opv}</td><td class="${cls}">${ds}</td></tr>`;}).join('')}</tbody></table>
+    <table class="compare">
+      <thead><tr><th>Ingredient</th><th>Current</th><th>Optimized</th><th>Δ</th></tr></thead>
+      <tbody>${rows.map(([l,cur,opv]) => {
+        const d = opv-cur, ds = (d>=0?'+':'') + d.toFixed(1), cls = d<-0.5?'neg':d>0.5?'pos':'';
+        return `<tr><td>${l}</td><td>${typeof cur==='number'?cur.toFixed(1):cur}</td><td>${typeof opv==='number'?opv.toFixed(1):opv}</td><td class="${cls}">${ds}</td></tr>`;
+      }).join('')}</tbody>
+    </table>
     <div class="result-actions">
       <button class="btn-save" onclick="saveMix()">Save to project</button>
       <button class="btn-save" onclick="showToast('PDF export coming soon.')">Export report</button>
@@ -313,42 +325,73 @@ function showResult(base,opt,target) {
 }
 
 function saveMix() {
-  if(!lastResult) return;
-  const projects=load(), p=projects.find(x=>x.id===projectId); if(!p) return;
-  const element=document.getElementById('i-element').value.trim();
-  const gl={cheapest:'Cheapest mix',lowest_co2:'Lowest CO₂',highest_strength:'Highest strength',match_target:'Match target'}[goal];
-  p.mixes=p.mixes||[];
-  p.mixes.push({id:uid(),name:element||gl,goal,element,strength:lastResult.opt.strength,co2:lastResult.opt.co2,cost:lastResult.opt.cost,grade:grade(lastResult.opt.strength),details:gl+' · '+lastResult.opt.strength.toFixed(1)+' MPa',ingredients:lastResult.opt,savedAt:new Date().toISOString()});
+  if (!lastResult) return;
+  const projects = load();
+  const p = projects.find(x => x.id === projectId); if (!p) return;
+  const element = document.getElementById('i-element').value.trim();
+  const gl = {cheapest:'Cheapest mix', lowest_co2:'Lowest CO₂', highest_strength:'Highest strength', match_target:'Match target'}[goal];
+  p.mixes = p.mixes || [];
+  p.mixes.push({
+    id: uid(), name: element || gl, goal, element,
+    strength: lastResult.opt.strength, co2: lastResult.opt.co2, cost: lastResult.opt.cost,
+    grade: grade(lastResult.opt.strength),
+    details: gl + ' · ' + lastResult.opt.strength.toFixed(1) + ' MPa',
+    ingredients: lastResult.opt, savedAt: new Date().toISOString()
+  });
   save(projects); updateBadge(); showToast('Mix saved.');
 }
 
 function renderMixes() {
-  const p=getProj(); if(!p) return;
-  const mixes=p.mixes||[];
-  document.getElementById('mixes-label').textContent='Saved mixes'+(mixes.length?' ('+mixes.length+')':'');
-  const c=document.getElementById('mixes-container');
-  if(!mixes.length){c.innerHTML='<div class="empty-state">No mixes saved yet. Run the optimizer and save results here.</div>';return;}
-  c.innerHTML=`<div class="mix-list">${[...mixes].reverse().map(m=>`<div class="mix-row"><div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div><div class="mix-right"><div><div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div><div class="mix-grade">${m.grade||''}</div></div><button class="btn-del-mix" onclick="delMix('${m.id}')">✕</button></div></div>`).join('')}</div>`;
+  const p = getProj(); if (!p) return;
+  const mixes = p.mixes || [];
+  document.getElementById('mixes-label').textContent = 'Saved mixes' + (mixes.length ? ' (' + mixes.length + ')' : '');
+  const c = document.getElementById('mixes-container');
+  if (!mixes.length) { c.innerHTML = '<div class="empty-state">No mixes saved yet. Run the optimizer and save results here.</div>'; return; }
+  c.innerHTML = `<div class="mix-list">${[...mixes].reverse().map(m => `
+    <div class="mix-row">
+      <div>
+        <div class="mix-name">${esc(m.name)}</div>
+        <div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+      <div class="mix-right">
+        <div>
+          <div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div>
+          <div class="mix-grade">${m.grade||''}</div>
+        </div>
+        <button class="btn-del-mix" onclick="delMix('${m.id}')">✕</button>
+      </div>
+    </div>`).join('')}</div>`;
 }
 
 function delMix(id) {
-  const projects=load(),p=projects.find(x=>x.id===projectId); if(!p) return;
-  p.mixes=(p.mixes||[]).filter(m=>m.id!==id);
+  const projects = load(), p = projects.find(x => x.id === projectId); if (!p) return;
+  p.mixes = (p.mixes||[]).filter(m => m.id !== id);
   save(projects); updateBadge(); renderMixes(); showToast('Mix removed.');
 }
 
 function renderReports() {
-  const p=getProj(); if(!p) return;
-  const mixes=p.mixes||[];
-  const c=document.getElementById('reports-container');
-  if(!mixes.length){c.innerHTML='<div class="empty-state">No mixes to report yet. Save mixes from the Optimize tab.</div>';return;}
-  c.innerHTML=`<div class="section-title">Saved mixes (${mixes.length})</div><div class="mix-list">${mixes.map(m=>`<div class="mix-row"><div><div class="mix-name">${esc(m.name)}</div><div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div></div><div class="mix-right"><div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div><button class="btn-save" onclick="showToast('PDF export coming soon.')">Export</button></div></div>`).join('')}</div>`;
+  const p = getProj(); if (!p) return;
+  const mixes = p.mixes || [];
+  const c = document.getElementById('reports-container');
+  if (!mixes.length) { c.innerHTML = '<div class="empty-state">No mixes to report yet. Save mixes from the Optimize tab.</div>'; return; }
+  c.innerHTML = `<div class="section-title">Saved mixes (${mixes.length})</div>
+    <div class="mix-list">${mixes.map(m => `
+      <div class="mix-row">
+        <div>
+          <div class="mix-name">${esc(m.name)}</div>
+          <div class="mix-detail">${esc(m.details||'')} · ${new Date(m.savedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+        </div>
+        <div class="mix-right">
+          <div class="mix-mpa">${Number(m.strength).toFixed(1)} MPa</div>
+          <button class="btn-save" onclick="showToast('PDF export coming soon.')">Export</button>
+        </div>
+      </div>`).join('')}</div>`;
 }
 
 function showToast(msg) {
-  const el=document.getElementById('toast');
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'),2500);
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
 }
 </script>
 </body>
